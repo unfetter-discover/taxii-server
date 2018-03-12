@@ -1,0 +1,1 @@
+`stix.json` contains 100 STIX objects to be used in testing the TAXII server. Import `stix.json` into a MongoDB named 'stix' and enter the corresponding connection string into `config.json` to enable unit testing. There are currently 69 unit tests that test various aspects of functionality, including error handling.

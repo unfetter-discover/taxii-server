@@ -1,0 +1,11 @@
+{
+    "stix": {
+        "collections": [
+            {
+                "id": "95ecc380-afe9-11e4-9b6c-751b66dd541e",
+                "title": "Enterprise ATT&CK",
+                "description": "This data collection holds STIX objects from Enterprise ATT&CK"
+            }
+        ]
+    }
+}
