@@ -102,10 +102,20 @@ app.get('/:root/collections', (req, res) => {
       let firstElement = regExp.exec(req.get('range'));
       let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-      firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
-      lastElement = parseInt(lastElement, 10) + 1;
-      rootCollections = rootCollections.slice(firstElement, lastElement);
-      res.status(206);
+      if(firstElement == null) {
+        res.status(416).send(error.ERROR_416);
+        return;
+      } else {
+        firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
+        lastElement = parseInt(lastElement, 10) + 1;
+        if (isNaN(lastElement)) {
+          rootCollections = rootCollections.slice(firstElement);
+        }
+        else {
+          rootCollections = rootCollections.slice(firstElement, lastElement);
+        }
+        res.status(206);
+      }
     }
 
     for (let i = 0; i < rootCollections.length; i += 1) {
@@ -233,10 +243,20 @@ app.get('/:root/collections/:id/objects', (req, res) => {
           let firstElement = regExp.exec(req.get('range'));
           let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-          firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
-          lastElement = parseInt(lastElement, 10) + 1;
-          responseData = responseData.slice(firstElement, lastElement);
-          res.status(206);
+          if(firstElement == null) {
+            res.status(416).send(error.ERROR_416);
+            return;
+          } else {
+            firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
+            lastElement = parseInt(lastElement, 10) + 1;
+            if (isNaN(lastElement)) {
+              responseData = responseData.slice(firstElement);
+            }
+            else {
+              responseData = responseData.slice(firstElement, lastElement);
+            }
+            res.status(206);
+          }
         }
 
         if (responseData && responseData.length) {
@@ -257,7 +277,7 @@ app.get('/:root/collections/:id/objects', (req, res) => {
         // throws a json error if the string isn't wrapped in stringify()
         res.status(404).send(JSON.stringify(error.ERROR_404));
       }
-    });
+    }).sort({'stix.created': -1});
   } else {
     res.status(406).send(error.ERROR_406);
   }
@@ -373,10 +393,20 @@ app.get('/:root/collections/:id/manifest', (req, res) => {
         let firstElement = regExp.exec(req.get('range'));
         let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-        firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
-        lastElement = parseInt(lastElement, 10) + 1;
-        responseData = responseData.slice(firstElement, lastElement);
-        res.status(206);
+        if(firstElement == null) {
+          res.status(416).send(error.ERROR_416);
+          return;
+        } else {
+          firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
+          lastElement = parseInt(lastElement, 10) + 1;
+          if (isNaN(lastElement)) {
+            responseData = responseData.slice(firstElement);
+          }
+          else {
+            responseData = responseData.slice(firstElement, lastElement);
+          }
+          res.status(206);
+        }
       }
 
       const manifest = [];
@@ -402,7 +432,7 @@ app.get('/:root/collections/:id/manifest', (req, res) => {
         // throws a json error if the string isn't wrapped in stringify()
         res.status(416).send(JSON.stringify(error.ERROR_416));
       }
-    });
+    }).sort({'stix.created': -1});
   } else {
     // throws a json error if the string isn't wrapped in stringify()
     res.status(406).send(JSON.stringify(error.ERROR_406));
