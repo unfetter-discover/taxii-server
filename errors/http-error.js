@@ -6,7 +6,7 @@ const ERROR_404 = {
 
 const ERROR_406 = {
   title: '406 Not Acceptable',
-  description: 'HTTP header "Accepts" contains an invalid content type',
+  description: 'HTTP header "Accept" contains an invalid content type',
   http_status: '406',
 };
 
@@ -18,8 +18,8 @@ const ERROR_416 = {
 
 const ERROR_500 = {
   title: '500 Internal Server Error',
-  description: 'An internal server error has occured', 
-  http_status: 500
+  description: 'An internal server error has occured',
+  http_status: 500,
 };
 
 

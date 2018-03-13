@@ -6,9 +6,9 @@
     "response_type": {"taxii": "application/vnd.oasis.taxii+json; version=2.0", "stix": "application/vnd.oasis.stix+json; version=2.0"},
     "bundle_spec_version": "2.0",
     "discovery": {
-            "title": "Default TAXII server",
-            "description": "This TAXII server contains a listing of...",
-            "contact": "string containing contact information",
+            "title": "CTI TAXII server",
+            "description": "This TAXII server contains a listing of ATT&CK domain collections expressed as STIX, including PRE-ATT&CK, ATT&CK for Enterprise, and ATT&CK Mobile.",
+            "contact": "attack@mitre.org",
             "default": "stix",
             "api_roots": [
                 "stix"

@@ -11,6 +11,10 @@ const expect = chai.expect;
 
 chai.use(chaiHttp);
 
+// TODO:
+// test at least once per endpoint with other accept type
+// consistency with "invalid" and "undefined" tests
+// John's bugs
 describe('TAXII', () => {
   describe('/GET taxii', () => {
     it('it should GET server discovery info', (done) => {

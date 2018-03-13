@@ -1,5 +1,4 @@
 const express = require('express');
-const range = require('express-range');
 const uuidv4 = require('uuid/v4');
 
 const mongoose = require('./init');
@@ -21,7 +20,6 @@ if (process.env.NODE_ENV === 'test') {
 mongoose.connect(config.connection_string);
 
 app.disable('x-powered-by');
-app.use(range({ accept: 'items', limit: 100 }));
 
 const validRoots = [];
 const rootKeys = Object.keys(config.discovery.api_roots);
@@ -94,7 +92,21 @@ app.get('/:root/collections', (req, res) => {
   let rootCollections = collections[req.params.root].collections;
 
   if (helper.isValidContentType(req, 'taxii')) {
-    rootCollections = rootCollections.slice(req.range.first, req.range.last + 1);
+    if (req.get('range')) {
+      if (req.get('range').indexOf('items') !== 0) {
+        res.status(416).send(error.ERROR_416);
+        return;
+      }
+
+      const regExp = /\=(.*)\-/;
+      let firstElement = regExp.exec(req.get('range'));
+      let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
+
+      firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
+      lastElement = parseInt(lastElement, 10) + 1;
+      rootCollections = rootCollections.slice(firstElement, lastElement);
+      res.status(206);
+    }
 
     for (let i = 0; i < rootCollections.length; i += 1) {
       rootCollections[i].can_read = 'true';
@@ -196,12 +208,36 @@ app.get('/:root/collections/:id/objects', (req, res) => {
 
         for (let i = 0; i < responseData.length; i += 1) {
           responseData[i] = JSON.parse(JSON.stringify(responseData[i]));
+
+          let extendedProperties = null;
+          if (responseData[i].extendedProperties) {
+            extendedProperties = responseData[i].extendedProperties;
+          }
+
           if (responseData[i].stix) {
             responseData[i] = responseData[i].stix;
           }
+
+          if (extendedProperties) {
+            responseData[i] = Object.assign({}, responseData[i], extendedProperties);
+          }
         }
 
-        responseData = responseData.slice(req.range.first, req.range.last + 1);
+        if (req.get('range')) {
+          if (req.get('range').indexOf('items') !== 0) {
+            res.status(416).send(error.ERROR_416);
+            return;
+          }
+
+          const regExp = /\=(.*)\-/;
+          let firstElement = regExp.exec(req.get('range'));
+          let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
+
+          firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
+          lastElement = parseInt(lastElement, 10) + 1;
+          responseData = responseData.slice(firstElement, lastElement);
+          res.status(206);
+        }
 
         if (responseData && responseData.length) {
           res.set('Content-Type', config.response_type.stix);
@@ -253,10 +289,22 @@ app.get('/:root/collections/:id/objects/:objectid', (req, res) => {
       }
 
       for (let i = 0; i < responseData.length; i += 1) {
+        responseData[i] = JSON.parse(JSON.stringify(responseData[i]));
+
+        let extendedProperties = null;
+        if (responseData[i].extendedProperties) {
+          extendedProperties = responseData[i].extendedProperties;
+        }
+
         if (responseData[i].stix) {
           responseData[i] = responseData[i].stix;
         }
+
+        if (extendedProperties) {
+          responseData[i] = Object.assign({}, responseData[i], extendedProperties);
+        }
       }
+
       if (responseData.length) {
         const bundle = {
           type: 'bundle',
@@ -315,7 +363,21 @@ app.get('/:root/collections/:id/manifest', (req, res) => {
         }
       }
 
-      responseData = responseData.slice(req.range.first, req.range.last + 1);
+      if (req.get('range')) {
+        if (req.get('range').indexOf('items') !== 0) {
+          res.status(416).send(error.ERROR_416);
+          return;
+        }
+
+        const regExp = /\=(.*)\-/;
+        let firstElement = regExp.exec(req.get('range'));
+        let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
+
+        firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
+        lastElement = parseInt(lastElement, 10) + 1;
+        responseData = responseData.slice(firstElement, lastElement);
+        res.status(206);
+      }
 
       const manifest = [];
       let manifestEntry;
