@@ -264,7 +264,7 @@ app.get('/:root/collections/:id/objects', (req, res) => {
           // transform array to bundle
           const bundle = {
             type: 'bundle',
-            id: uuidv4(),
+            id: 'bundle--' + uuidv4(),
             spec_version: config.bundle_spec_version,
             objects: responseData,
           };
@@ -328,7 +328,7 @@ app.get('/:root/collections/:id/objects/:objectid', (req, res) => {
       if (responseData.length) {
         const bundle = {
           type: 'bundle',
-          id: uuidv4(),
+          id: 'bundle--' + uuidv4(),
           spec_version: config.bundle_spec_version,
           objects: responseData,
         };
