@@ -3,7 +3,7 @@ import { Request } from 'express';
 import * as config from '../assets/config.json';
 
 export default class Helper {
-  public static isValidContentType(req: Request, type: string): boolean  {
+  public static isValidContentType(req: Request, type: string): boolean {
     const accepts = Object.getOwnPropertyDescriptor(config, 'accepts');
     if (type === 'taxii' || type === 'stix') {
       for (let acceptValue of accepts.value) {

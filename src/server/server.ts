@@ -7,10 +7,11 @@ import Helper from './helper';
 import * as objectSchema from '../models/object';
 
 import * as _config from '../assets/config.json';
-import * as collections from '../assets/collections.json';
+import * as _collections from '../assets/collections.json';
 import * as testConfig from '../test/config.json';
 
 let config: any;
+let collections: any = _collections;
 if (process.env.NODE_ENV === 'test') {
   config = testConfig;
 } else {
@@ -23,7 +24,7 @@ mongoose.connect(config.connection_string);
 
 app.disable('x-powered-by');
 
-const validRoots = [];
+const validRoots: any[] = [];
 const rootKeys: any = Object.keys(config.discovery.api_roots);
 const rootValues: any = Object.values(config.discovery.api_roots);
 validRoots.push(config.discovery.default.split('/').pop());
@@ -52,90 +53,89 @@ app.get('/taxii', (req: express.Request, res: express.Response) => {
   }
 });
 
-// app.get('/:root', (req, res) => {
-//   res.removeHeader('Accept-Ranges');
-//   res.removeHeader('Content-Range');
-//   if (Helper.isValidContentType(req, 'taxii')) {
-//     let response;
-//     if (config.autogenerate_roots.enabled) {
-//       response = {};
-//       if (Helper.arrayContains(req.params.root, validRoots)) {
-//         response.title = req.params.root;
-//         response.max_content_length = config.autogenerate_roots.max_content_length;
-//         response.versions = config.autogenerate_roots.versions;
-//       } else {
-//         response = null;
-//       }
-//     } else {
-//       const roots = Object.getOwnPropertyDescriptor(config, 'roots');
-//       for (let i = 0; i < roots.value.length; i += 1) {
-//         if (roots.value[i].path === req.params.root) {
-//           response = Helper.cloneObject(roots.value[i]);
-//           delete response.path;
-//         }
-//       }
-//     }
-//     if (response) {
-//       res.set('Content-Type', config.response_type.taxii);
-//       res.send(response);
-//     } else {
-//       res.status(404).send(error.ERROR_404);
-//     }
-//   } else {
-//     res.status(406).send(error.ERROR_406);
-//   }
-// });
+app.get('/:root', (req, res) => {
+  res.removeHeader('Accept-Ranges');
+  res.removeHeader('Content-Range');
+  if (Helper.isValidContentType(req, 'taxii')) {
+    let response: any;
+    if (config.autogenerate_roots.enabled) {
+      response = {};
+      if (Helper.arrayContains(req.params.root, validRoots)) {
+        response.title = req.params.root;
+        response.max_content_length = config.autogenerate_roots.max_content_length;
+        response.versions = config.autogenerate_roots.versions;
+      } else {
+        response = null;
+      }
+    } else {
+      const roots = Object.getOwnPropertyDescriptor(config, 'roots');
+      roots.value.forEach((rootValue: any) => {
+        if (rootValue.path === req.params.root) {
+          response = Helper.cloneObject(rootValue);
+          delete response.path;
+        }
+      });
+    }
+    if (response) {
+      res.set('Content-Type', config.response_type.taxii);
+      res.send(response);
+    } else {
+      res.status(404).send(error.ERROR_404);
+    }
+  } else {
+    res.status(406).send(error.ERROR_406);
+  }
+});
 
-// app.get('/:root/collections', (req, res) => {
-//   if (collections[req.params.root] === undefined) {
-//     res.status(404).send(error.ERROR_404);
-//   }
+app.get('/:root/collections', (req, res) => {
+  if (collections[req.params.root] === undefined) {
+    res.status(404).send(error.ERROR_404);
+  }
 
-//   let rootCollections = collections[req.params.root].collections;
+  let rootCollections = collections[req.params.root].collections;
 
-//   if (Helper.isValidContentType(req, 'taxii')) {
-//     if (req.get('range')) {
-//       if (req.get('range').indexOf('items') !== 0) {
-//         res.status(416).send(error.ERROR_416);
-//         return;
-//       }
+  if (Helper.isValidContentType(req, 'taxii')) {
+    if (req.get('range')) {
+      if (req.get('range').indexOf('items') !== 0) {
+        res.status(416).send(error.ERROR_416);
+        return;
+      }
 
-//       const regExp = /\=(.*)\-/;
-//       let firstElement = regExp.exec(req.get('range'));
-//       let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
+      const regExp = /\=(.*)\-/;
+      let firstElement: any = regExp.exec(req.get('range'));
+      let lastElement: any = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-//       if(firstElement == null) {
-//         res.status(416).send(error.ERROR_416);
-//         return;
-//       } else {
-//         firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
-//         lastElement = parseInt(lastElement, 10) + 1;
-//         if (isNaN(lastElement)) {
-//           rootCollections = rootCollections.slice(firstElement);
-//         }
-//         else {
-//           rootCollections = rootCollections.slice(firstElement, lastElement);
-//         }
-//         res.status(206);
-//       }
-//     }
+      if (firstElement == null) {
+        res.status(416).send(error.ERROR_416);
+        return;
+      } else {
+        firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
+        lastElement = parseInt(lastElement, 10) + 1;
+        if (isNaN(lastElement)) {
+          rootCollections = rootCollections.slice(firstElement);
+        } else {
+          rootCollections = rootCollections.slice(firstElement, lastElement);
+        }
+        res.status(206);
+      }
+    }
 
-//     for (let i = 0; i < rootCollections.length; i += 1) {
-//       rootCollections[i].can_read = 'true';
-//       rootCollections[i].can_write = 'false';
-//       rootCollections[i].media_types = ['application/vnd.oasis.stix+json; version=2.0'];
-//     }
+    rootCollections.forEach((rootCollection: any) => {
+      rootCollection.can_read = 'true';
+      rootCollection.can_write = 'false';
+      rootCollection.media_types = ['application/vnd.oasis.stix+json; version=2.0'];
+    });
 
-//     if (rootCollections && rootCollections.length) {
-//       res.set('Content-Type', config.response_type.taxii);
-//       res.send(rootCollections);
-//     } else {
-//       res.status(416).send(error.ERROR_416);
-//     }
-//   } else {
-//     res.status(406).send(error.ERROR_406);
-//   }
-// });
+    if (rootCollections && rootCollections.length) {
+      res.set('Content-Type', config.response_type.taxii);
+      res.send(rootCollections);
+    } else {
+      res.status(416).send(error.ERROR_416);
+    }
+  } else {
+    res.status(406).send(error.ERROR_406);
+  }
+});
 
 // app.get('/:root/collections/:id', (req, res) => {
 //   res.removeHeader('Accept-Ranges');
