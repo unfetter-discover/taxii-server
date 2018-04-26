@@ -1,5 +1,5 @@
 import * as _mongoose from 'mongoose';
-import * as validate from 'uuid-validate';
+import * as uuidValidate from 'uuid-validate';
 
 import * as invalidUUIDError from '../errors/invalid-uuid';
 
@@ -32,7 +32,7 @@ discovery.value.api_roots.forEach((rawApiRoot: any) => {
 });
 
 collections.stix.collections.forEach((stixCollection: any) => {
-  if (!validate(stixCollection.id)) {
+  if (!uuidValidate(stixCollection.id)) {
     throw (invalidUUIDError);
   }
 });

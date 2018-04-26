@@ -20,17 +20,17 @@ export default class Helper {
     return clone;
   }
 
-  public static arrayContains(str: any, arr: any) {
+  public static arrayContains(str: any, arr: any[]) {
     const contains = (arr.indexOf(str) > -1);
     return (contains);
   }
 
-  public static remove(element: any, arr: any) {
+  public static remove(element: any, arr: any[]) {
     const filter = arr.filter((e: any) => e !== element);
     return filter;
   }
 
-  public static filterId(id: any, data: any) {
+  public static filterId(id: any, data: any[]) {
     const responseData: any[] = [];
     if (id.indexOf(',') > -1) {
       const splitIds = id.split(',');
@@ -51,7 +51,7 @@ export default class Helper {
     return responseData;
   }
 
-  public static filterType(type: any, data: any) {
+  public static filterType(type: any, data: any[]) {
     const responseData: any[] = [];
     if (type.indexOf(',') > -1) {
       const splitTypes = type.split(',');
@@ -72,7 +72,7 @@ export default class Helper {
     return responseData;
   };
 
-  public static filterVersion(version: any, data: any) {
+  public static filterVersion(version: any, data: any[]) {
     let responseData = data;
 
     if (version === 'last') {
