@@ -102,7 +102,7 @@ app.get('/:root/collections', (req, res) => {
       let firstElement = regExp.exec(req.get('range'));
       let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-      if(firstElement == null) {
+      if (firstElement == null) {
         res.status(416).send(error.ERROR_416);
         return;
       } else {
@@ -126,6 +126,7 @@ app.get('/:root/collections', (req, res) => {
 
     if (rootCollections && rootCollections.length) {
       res.set('Content-Type', config.response_type.taxii);
+      rootCollections = { 'collections': rootCollections };
       res.send(rootCollections);
     } else {
       res.status(416).send(error.ERROR_416);
@@ -243,7 +244,7 @@ app.get('/:root/collections/:id/objects', (req, res) => {
           let firstElement = regExp.exec(req.get('range'));
           let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-          if(firstElement == null) {
+          if (firstElement == null) {
             res.status(416).send(error.ERROR_416);
             return;
           } else {
@@ -277,7 +278,7 @@ app.get('/:root/collections/:id/objects', (req, res) => {
         // throws a json error if the string isn't wrapped in stringify()
         res.status(404).send(JSON.stringify(error.ERROR_404));
       }
-    }).sort({'stix.created': -1});
+    }).sort({ 'stix.created': -1 });
   } else {
     res.status(406).send(error.ERROR_406);
   }
@@ -393,7 +394,7 @@ app.get('/:root/collections/:id/manifest', (req, res) => {
         let firstElement = regExp.exec(req.get('range'));
         let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-        if(firstElement == null) {
+        if (firstElement == null) {
           res.status(416).send(error.ERROR_416);
           return;
         } else {
@@ -432,7 +433,7 @@ app.get('/:root/collections/:id/manifest', (req, res) => {
         // throws a json error if the string isn't wrapped in stringify()
         res.status(416).send(JSON.stringify(error.ERROR_416));
       }
-    }).sort({'stix.created': -1});
+    }).sort({ 'stix.created': -1 });
   } else {
     // throws a json error if the string isn't wrapped in stringify()
     res.status(406).send(JSON.stringify(error.ERROR_406));
