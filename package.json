@@ -3,8 +3,19 @@
   "version": "0.1.0",
   "description": "TAXII 2.0 server written for Node.js",
   "scripts": {
+    "build-ts": "tsc",
+    "checkup": "npm run clean && npm run build-ts && npm run lint && npm run docs && npm run coverage",
+    "clean": "rimraf dist/ tsdocs/ coverage/ .nyc_output/",
+    "coverage": "nyc --extension .ts --reporter=lcov --reporter=text-lcov npm test && nyc report",
+    "docs": "typedoc --out tsdocs --ignoreCompilerErrors --exclude '**/*.spec.ts' src/",
+    "lint": "tslint src/**/*.ts",
     "start": "ts-node src/server/server.ts",
     "test": "mocha -r ts-node/register src/test/*.spec.ts"
+  },
+  "nyc": {
+    "exclude": [
+      "src/**/*.spec.ts"
+    ]
   },
   "keywords": [
     "taxii",
@@ -33,8 +44,12 @@
     "chai-http": "^4.0.0",
     "concurrently": "^3.5.1",
     "mocha": "^5.1.1",
+    "nyc": "^11.7.1",
+    "rimraf": "^2.6.2",
+    "source-map-support": "^0.5.5",
     "ts-node": "^6.0.1",
     "tslint": "^5.9.1",
+    "typedoc": "^0.11.1",
     "typescript": "^2.8.3"
   }
 }

@@ -245,7 +245,7 @@ app.get('/:root/collections/:id/objects', (req, res) => {
           let firstElement: any = regExp.exec(req.get('range'));
           let lastElement: any = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-          if(firstElement == null) {
+          if (firstElement == null) {
             res.status(416).send(error.ERROR_416);
             return;
           } else {
@@ -394,7 +394,7 @@ app.get('/:root/collections/:id/manifest', (req, res) => {
         let firstElement: any = regExp.exec(req.get('range'));
         let lastElement: any = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-        if(firstElement == null) {
+        if (firstElement == null) {
           res.status(416).send(error.ERROR_416);
           return;
         } else {
