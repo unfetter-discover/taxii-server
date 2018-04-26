@@ -37,7 +37,7 @@ app.get('/taxii', (req: express.Request, res: express.Response) => {
   res.removeHeader('Accept-Ranges');
   res.removeHeader('Content-Range');
   if (Helper.isValidContentType(req, 'taxii')) {
-    const discovery = Helper.cloneObject(Object.getOwnPropertyDescriptor(config, 'discovery'));
+    const discovery = { ...Object.getOwnPropertyDescriptor(config, 'discovery') };
     if (discovery) {
       res.set('Content-Type', config.response_type.taxii);
       discovery.value.default = `${req.protocol}://${req.get('host')}/${discovery.value.default}`;
@@ -71,7 +71,7 @@ app.get('/:root', (req, res) => {
       const roots = Object.getOwnPropertyDescriptor(config, 'roots');
       roots.value.forEach((rootValue: any) => {
         if (rootValue.path === req.params.root) {
-          response = Helper.cloneObject(rootValue);
+          response = { ...rootValue };
           delete response.path;
         }
       });

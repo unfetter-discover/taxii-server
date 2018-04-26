@@ -2,9 +2,8 @@
   "name": "taxii-server",
   "version": "0.1.0",
   "description": "TAXII 2.0 server written for Node.js",
-  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "ts-node src/server/server.ts",
     "test": "mocha -r ts-node/register src/test/*.spec.ts"
   },
   "keywords": [

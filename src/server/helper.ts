@@ -3,6 +3,12 @@ import { Request } from 'express';
 import * as config from '../assets/config.json';
 
 export default class Helper {
+  
+  /**
+   * @param  {Request} req
+   * @param  {string} type
+   * @returns boolean
+   */
   public static isValidContentType(req: Request, type: string): boolean {
     const accepts = Object.getOwnPropertyDescriptor(config, 'accepts');
     if (type === 'taxii' || type === 'stix') {
@@ -15,22 +21,32 @@ export default class Helper {
     return false;
   }
 
-  public static cloneObject(obj: any) {
-    const clone = JSON.parse(JSON.stringify(obj));
-    return clone;
-  }
-
-  public static arrayContains(str: any, arr: any[]) {
+  /**
+   * @param  {any} str
+   * @param  {any[]} arr
+   * @returns boolean
+   */
+  public static arrayContains(str: any, arr: any[]): boolean {
     const contains = (arr.indexOf(str) > -1);
     return (contains);
   }
 
-  public static remove(element: any, arr: any[]) {
+  /**
+   * @param  {any} element
+   * @param  {any[]} arr
+   * @returns any
+   */
+  public static remove(element: any, arr: any[]): any[] {
     const filter = arr.filter((e: any) => e !== element);
     return filter;
   }
 
-  public static filterId(id: any, data: any[]) {
+  /**
+   * @param  {any} id
+   * @param  {any[]} data
+   * @returns any
+   */
+  public static filterId(id: any, data: any[]): any[] {
     const responseData: any[] = [];
     if (id.indexOf(',') > -1) {
       const splitIds = id.split(',');
@@ -51,7 +67,12 @@ export default class Helper {
     return responseData;
   }
 
-  public static filterType(type: any, data: any[]) {
+  /**
+   * @param  {any} type
+   * @param  {any[]} data
+   * @returns any
+   */
+  public static filterType(type: any, data: any[]): any[] {
     const responseData: any[] = [];
     if (type.indexOf(',') > -1) {
       const splitTypes = type.split(',');
@@ -72,7 +93,12 @@ export default class Helper {
     return responseData;
   };
 
-  public static filterVersion(version: any, data: any[]) {
+  /**
+   * @param  {any} version
+   * @param  {any[]} data
+   * @returns any
+   */
+  public static filterVersion(version: any, data: any[]): any[] {
     let responseData = data;
 
     if (version === 'last') {
@@ -149,8 +175,12 @@ export default class Helper {
 
     return responseData;
   }
-
-  public static getMaxSize(req: Request) {
+  
+  /**
+   * @param  {Request} req
+   * @returns string
+   */
+  public static getMaxSize(req: Request): string {
     let maxSize;
     if ((config as any).autogenerate_roots.enabled) {
       maxSize = (config as any).autogenerate_roots.max_content_length;
