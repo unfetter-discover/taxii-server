@@ -137,309 +137,307 @@ app.get('/:root/collections', (req, res) => {
   }
 });
 
-// app.get('/:root/collections/:id', (req, res) => {
-//   res.removeHeader('Accept-Ranges');
-//   res.removeHeader('Content-Range');
-//   let match;
+app.get('/:root/collections/:id', (req, res) => {
+  res.removeHeader('Accept-Ranges');
+  res.removeHeader('Content-Range');
+  let match;
 
-//   if (collections[req.params.root] === undefined) {
-//     res.status(404).send(error.ERROR_404);
-//   }
+  if (collections[req.params.root] === undefined) {
+    res.status(404).send(error.ERROR_404);
+  }
 
-//   const rootCollections = collections[req.params.root].collections;
-//   let isCollectionValid;
+  const rootCollections = collections[req.params.root].collections;
+  let isCollectionValid;
 
-//   for (let i = 0; i < rootCollections.length; i += 1) {
-//     if (req.params.id === rootCollections[i].id) {
-//       isCollectionValid = true;
-//     }
-//   }
+  rootCollections.forEach((rootCollection: any) => {
+    if (req.params.id === rootCollection.id) {
+      isCollectionValid = true;
+    }
+  });
 
-//   if (!isCollectionValid) {
-//     res.status(404).send(error.ERROR_404);
-//   }
+  if (!isCollectionValid) {
+    res.status(404).send(error.ERROR_404);
+  }
 
-//   if (Helper.isValidContentType(req, 'taxii')) {
-//     for (let i = 0; i < rootCollections.length; i += 1) {
-//       if (rootCollections[i].id === req.params.id) {
-//         match = rootCollections[i];
-//         // these are hardcoded for response until write access is implemented
-//         match.can_read = 'true';
-//         match.can_write = 'false';
-//         match.media_types = ['application/vnd.oasis.stix+json; version=2.0'];
-//       }
-//     }
-//     if (match) {
-//       res.set('Content-Type', config.response_type.taxii);
-//       res.send(match);
-//     } else {
-//       res.status(416).send(error.ERROR_416);
-//     }
-//   } else {
-//     res.status(406).send(error.ERROR_406);
-//   }
-// });
+  if (Helper.isValidContentType(req, 'taxii')) {
+    rootCollections.forEach((rootCollection: any) => {
+      if (rootCollection.id === req.params.id) {
+        match = rootCollection;
+        // these are hardcoded for response until write access is implemented
+        match.can_read = 'true';
+        match.can_write = 'false';
+        match.media_types = ['application/vnd.oasis.stix+json; version=2.0'];
+      }
+    });
+    if (match) {
+      res.set('Content-Type', config.response_type.taxii);
+      res.send(match);
+    } else {
+      res.status(416).send(error.ERROR_416);
+    }
+  } else {
+    res.status(406).send(error.ERROR_406);
+  }
+});
 
-// app.get('/:root/collections/:id/objects', (req, res) => {
-//   res.set('Accept-Ranges', 'items');
+app.get('/:root/collections/:id/objects', (req, res) => {
+  res.set('Accept-Ranges', 'items');
 
-//   if (Helper.isValidContentType(req, 'stix')) {
-//     let obj;
+  if (Helper.isValidContentType(req, 'stix')) {
+    let obj;
 
-//     if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
-//       obj = mongoose[`${req.params.root}_conn`].model('Objects', objectSchema, 'stix');
-//     } else {
-//       res.status(404).send(error.ERROR_404);
-//       return;
-//     }
+    if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
+      obj = mongoose[`${req.params.root}_conn`].model('Objects', objectSchema, 'stix');
+    } else {
+      res.status(404).send(error.ERROR_404);
+      return;
+    }
 
-//     obj.find({ 'metaProperties.collection': req.params.id }, (err, data) => {
-//       res.set('Content-Type', config.response_type.stix);
-//       if (data && data.length) {
-//         let responseData = data;
+    obj.find({ 'metaProperties.collection': req.params.id }, (err: any, data: any) => {
+      res.set('Content-Type', config.response_type.stix);
+      if (data && data.length) {
+        let responseData = data;
 
-//         if (req.query.match) {
-//           if (req.query.match.id) {
-//             responseData = Helper.filterId(req.query.match.id, JSON.parse(JSON.stringify(data)));
-//           }
+        if (req.query.match) {
+          if (req.query.match.id) {
+            responseData = Helper.filterId(req.query.match.id, JSON.parse(JSON.stringify(data)));
+          }
 
-//           if (req.query.match.type) {
-//             responseData = Helper.filterType(
-//               req.query.match.type,
-//               JSON.parse(JSON.stringify(data)),
-//             );
-//           }
+          if (req.query.match.type) {
+            responseData = Helper.filterType(
+              req.query.match.type,
+              JSON.parse(JSON.stringify(data)),
+            );
+          }
 
-//           if (req.query.match.version) {
-//             responseData = Helper.filterVersion(
-//               req.query.match.version,
-//               JSON.parse(JSON.stringify(data)),
-//             );
-//           }
-//         }
+          if (req.query.match.version) {
+            responseData = Helper.filterVersion(
+              req.query.match.version,
+              JSON.parse(JSON.stringify(data)),
+            );
+          }
+        }
 
-//         for (let i = 0; i < responseData.length; i += 1) {
-//           responseData[i] = JSON.parse(JSON.stringify(responseData[i]));
+        for (let i = 0; i < responseData.length; i += 1) {
+          responseData[i] = JSON.parse(JSON.stringify(responseData[i]));
 
-//           let extendedProperties = null;
-//           if (responseData[i].extendedProperties) {
-//             extendedProperties = responseData[i].extendedProperties;
-//           }
+          let extendedProperties = null;
+          if (responseData[i].extendedProperties) {
+            extendedProperties = responseData[i].extendedProperties;
+          }
 
-//           if (responseData[i].stix) {
-//             responseData[i] = responseData[i].stix;
-//           }
+          if (responseData[i].stix) {
+            responseData[i] = responseData[i].stix;
+          }
 
-//           if (extendedProperties) {
-//             responseData[i] = Object.assign({}, responseData[i], extendedProperties);
-//           }
-//         }
+          if (extendedProperties) {
+            responseData[i] = Object.assign({}, responseData[i], extendedProperties);
+          }
+        }
 
-//         if (req.get('range')) {
-//           if (req.get('range').indexOf('items') !== 0) {
-//             res.status(416).send(error.ERROR_416);
-//             return;
-//           }
+        if (req.get('range')) {
+          if (req.get('range').indexOf('items') !== 0) {
+            res.status(416).send(error.ERROR_416);
+            return;
+          }
 
-//           const regExp = /\=(.*)\-/;
-//           let firstElement = regExp.exec(req.get('range'));
-//           let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
+          const regExp = /\=(.*)\-/;
+          let firstElement: any = regExp.exec(req.get('range'));
+          let lastElement: any = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-//           if(firstElement == null) {
-//             res.status(416).send(error.ERROR_416);
-//             return;
-//           } else {
-//             firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
-//             lastElement = parseInt(lastElement, 10) + 1;
-//             if (isNaN(lastElement)) {
-//               responseData = responseData.slice(firstElement);
-//             }
-//             else {
-//               responseData = responseData.slice(firstElement, lastElement);
-//             }
-//             res.status(206);
-//           }
-//         }
+          if(firstElement == null) {
+            res.status(416).send(error.ERROR_416);
+            return;
+          } else {
+            firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
+            lastElement = parseInt(lastElement, 10) + 1;
+            if (isNaN(lastElement)) {
+              responseData = responseData.slice(firstElement);
+            } else {
+              responseData = responseData.slice(firstElement, lastElement);
+            }
+            res.status(206);
+          }
+        }
 
-//         if (responseData && responseData.length) {
-//           res.set('Content-Type', config.response_type.stix);
-//           // transform array to bundle
-//           const bundle = {
-//             type: 'bundle',
-//             id: 'bundle--' + uuidv4(),
-//             spec_version: config.bundle_spec_version,
-//             objects: responseData,
-//           };
-//           res.send(bundle);
-//         } else {
-//           // throws a json error if the string isn't wrapped in stringify()
-//           res.status(416).send(JSON.stringify(error.ERROR_416));
-//         }
-//       } else {
-//         // throws a json error if the string isn't wrapped in stringify()
-//         res.status(404).send(JSON.stringify(error.ERROR_404));
-//       }
-//     }).sort({'stix.created': -1});
-//   } else {
-//     res.status(406).send(error.ERROR_406);
-//   }
-// });
+        if (responseData && responseData.length) {
+          res.set('Content-Type', config.response_type.stix);
+          // transform array to bundle
+          const bundle = {
+            type: 'bundle',
+            id: 'bundle--' + uuidv4(),
+            spec_version: config.bundle_spec_version,
+            objects: responseData,
+          };
+          res.send(bundle);
+        } else {
+          // throws a json error if the string isn't wrapped in stringify()
+          res.status(416).send(JSON.stringify(error.ERROR_416));
+        }
+      } else {
+        // throws a json error if the string isn't wrapped in stringify()
+        res.status(404).send(JSON.stringify(error.ERROR_404));
+      }
+    }).sort({'stix.created': -1});
+  } else {
+    res.status(406).send(error.ERROR_406);
+  }
+});
 
-// app.get('/:root/collections/:id/objects/:objectid', (req, res) => {
-//   res.removeHeader('Accept-Ranges');
-//   res.removeHeader('Content-Range');
-//   if (Helper.isValidContentType(req, 'stix')) {
-//     let objects;
+app.get('/:root/collections/:id/objects/:objectid', (req, res) => {
+  res.removeHeader('Accept-Ranges');
+  res.removeHeader('Content-Range');
+  if (Helper.isValidContentType(req, 'stix')) {
+    let objects;
 
-//     if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
-//       objects = mongoose[`${req.params.root}_conn`].model('Objects', objectSchema, 'stix');
-//     } else {
-//       res.status(404).send(error.ERROR_404);
-//       return;
-//     }
+    if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
+      objects = mongoose[`${req.params.root}_conn`].model('Objects', objectSchema, 'stix');
+    } else {
+      res.status(404).send(error.ERROR_404);
+      return;
+    }
 
-//     objects.find({ 'metaProperties.collection': req.params.id, 'stix.id': req.params.objectid }, (err, data) => {
-//       res.set('Content-Type', config.response_type.stix);
-//       let responseData = JSON.parse(JSON.stringify(data));
-//       if (req.query.match) {
-//         if (req.query.match.version) {
-//           responseData = Helper.filterVersion(
-//             req.query.match.version,
-//             JSON.parse(JSON.stringify(data)),
-//           );
-//         }
-//       }
+    objects.find({ 'metaProperties.collection': req.params.id, 'stix.id': req.params.objectid }, (err: any, data: any) => {
+      res.set('Content-Type', config.response_type.stix);
+      let responseData = JSON.parse(JSON.stringify(data));
+      if (req.query.match) {
+        if (req.query.match.version) {
+          responseData = Helper.filterVersion(
+            req.query.match.version,
+            JSON.parse(JSON.stringify(data)),
+          );
+        }
+      }
 
-//       for (let i = 0; i < responseData.length; i += 1) {
-//         responseData[i] = JSON.parse(JSON.stringify(responseData[i]));
+      for (let i = 0; i < responseData.length; i += 1) {
+        responseData[i] = JSON.parse(JSON.stringify(responseData[i]));
 
-//         let extendedProperties = null;
-//         if (responseData[i].extendedProperties) {
-//           extendedProperties = responseData[i].extendedProperties;
-//         }
+        let extendedProperties = null;
+        if (responseData[i].extendedProperties) {
+          extendedProperties = responseData[i].extendedProperties;
+        }
 
-//         if (responseData[i].stix) {
-//           responseData[i] = responseData[i].stix;
-//         }
+        if (responseData[i].stix) {
+          responseData[i] = responseData[i].stix;
+        }
 
-//         if (extendedProperties) {
-//           responseData[i] = Object.assign({}, responseData[i], extendedProperties);
-//         }
-//       }
+        if (extendedProperties) {
+          responseData[i] = Object.assign({}, responseData[i], extendedProperties);
+        }
+      }
 
-//       if (responseData.length) {
-//         const bundle = {
-//           type: 'bundle',
-//           id: 'bundle--' + uuidv4(),
-//           spec_version: config.bundle_spec_version,
-//           objects: responseData,
-//         };
-//         res.send(bundle);
-//       } else {
-//         res.status(404).send(JSON.stringify(error.ERROR_404));
-//       }
-//     });
-//   } else {
-//     res.status(406).send(error.ERROR_406);
-//   }
-// });
+      if (responseData.length) {
+        const bundle = {
+          type: 'bundle',
+          id: 'bundle--' + uuidv4(),
+          spec_version: config.bundle_spec_version,
+          objects: responseData,
+        };
+        res.send(bundle);
+      } else {
+        res.status(404).send(JSON.stringify(error.ERROR_404));
+      }
+    });
+  } else {
+    res.status(406).send(error.ERROR_406);
+  }
+});
 
-// app.get('/:root/collections/:id/manifest', (req, res) => {
-//   if (Helper.isValidContentType(req, 'taxii')) {
-//     let objects;
+app.get('/:root/collections/:id/manifest', (req, res) => {
+  if (Helper.isValidContentType(req, 'taxii')) {
+    let objects;
 
-//     if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
-//       objects = mongoose[`${req.params.root}_conn`].model('Objects', objectSchema, 'stix');
-//     } else {
-//       res.status(404).send(error.ERROR_404);
-//       return;
-//     }
+    if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
+      objects = mongoose[`${req.params.root}_conn`].model('Objects', objectSchema, 'stix');
+    } else {
+      res.status(404).send(error.ERROR_404);
+      return;
+    }
 
-//     objects.find({ 'metaProperties.collection': req.params.id }, '-_id', (err, data) => {
-//       res.set('Content-Type', config.response_type.taxii);
+    objects.find({ 'metaProperties.collection': req.params.id }, '-_id', (err: any, data: any) => {
+      res.set('Content-Type', config.response_type.taxii);
 
-//       let responseData = JSON.parse(JSON.stringify(data));
+      let responseData = JSON.parse(JSON.stringify(data));
 
-//       if (!responseData.length) {
-//         res.status(404).send(JSON.stringify(error.ERROR_404));
-//         return;
-//       }
+      if (!responseData.length) {
+        res.status(404).send(JSON.stringify(error.ERROR_404));
+        return;
+      }
 
-//       if (req.query.match) {
-//         if (req.query.match.id) {
-//           responseData = Helper.filterId(req.query.match.id, JSON.parse(JSON.stringify(responseData)));
-//         }
+      if (req.query.match) {
+        if (req.query.match.id) {
+          responseData = Helper.filterId(req.query.match.id, JSON.parse(JSON.stringify(responseData)));
+        }
 
-//         if (req.query.match.type) {
-//           responseData = Helper.filterType(
-//             req.query.match.type,
-//             JSON.parse(JSON.stringify(responseData)),
-//           );
-//         }
+        if (req.query.match.type) {
+          responseData = Helper.filterType(
+            req.query.match.type,
+            JSON.parse(JSON.stringify(responseData)),
+          );
+        }
 
-//         if (req.query.match.version) {
-//           responseData = Helper.filterVersion(
-//             req.query.match.version,
-//             JSON.parse(JSON.stringify(responseData)),
-//           );
-//         }
-//       }
+        if (req.query.match.version) {
+          responseData = Helper.filterVersion(
+            req.query.match.version,
+            JSON.parse(JSON.stringify(responseData)),
+          );
+        }
+      }
 
-//       if (req.get('range')) {
-//         if (req.get('range').indexOf('items') !== 0) {
-//           res.status(416).send(error.ERROR_416);
-//           return;
-//         }
+      if (req.get('range')) {
+        if (req.get('range').indexOf('items') !== 0) {
+          res.status(416).send(error.ERROR_416);
+          return;
+        }
 
-//         const regExp = /\=(.*)\-/;
-//         let firstElement = regExp.exec(req.get('range'));
-//         let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
+        const regExp = /\=(.*)\-/;
+        let firstElement: any = regExp.exec(req.get('range'));
+        let lastElement: any = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-//         if(firstElement == null) {
-//           res.status(416).send(error.ERROR_416);
-//           return;
-//         } else {
-//           firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
-//           lastElement = parseInt(lastElement, 10) + 1;
-//           if (isNaN(lastElement)) {
-//             responseData = responseData.slice(firstElement);
-//           }
-//           else {
-//             responseData = responseData.slice(firstElement, lastElement);
-//           }
-//           res.status(206);
-//         }
-//       }
+        if(firstElement == null) {
+          res.status(416).send(error.ERROR_416);
+          return;
+        } else {
+          firstElement = firstElement[0].substring(1, firstElement[0].length - 1);
+          lastElement = parseInt(lastElement, 10) + 1;
+          if (isNaN(lastElement)) {
+            responseData = responseData.slice(firstElement);
+          } else {
+            responseData = responseData.slice(firstElement, lastElement);
+          }
+          res.status(206);
+        }
+      }
 
-//       const manifest = [];
-//       let manifestEntry;
-//       for (let i = 0; i < responseData.length; i += 1) {
-//         if (responseData[i].stix) {
-//           responseData[i] = responseData[i].stix;
-//         }
-//         manifestEntry = {
-//           id: responseData[i].id,
-//           date_added: responseData[i].created,
-//           versions: [responseData[i].modified],
-//           media_types: config.response_type.stix,
-//         };
-//         manifest.push(manifestEntry);
-//       }
+      const manifest = [];
+      let manifestEntry;
+      for (let i = 0; i < responseData.length; i += 1) {
+        if (responseData[i].stix) {
+          responseData[i] = responseData[i].stix;
+        }
+        manifestEntry = {
+          id: responseData[i].id,
+          date_added: responseData[i].created,
+          versions: [responseData[i].modified],
+          media_types: config.response_type.stix,
+        };
+        manifest.push(manifestEntry);
+      }
 
-//       responseData = manifest;
+      responseData = manifest;
 
-//       if (responseData && responseData.length) {
-//         res.send(responseData);
-//       } else {
-//         // throws a json error if the string isn't wrapped in stringify()
-//         res.status(416).send(JSON.stringify(error.ERROR_416));
-//       }
-//     }).sort({'stix.created': -1});
-//   } else {
-//     // throws a json error if the string isn't wrapped in stringify()
-//     res.status(406).send(JSON.stringify(error.ERROR_406));
-//   }
-// });
+      if (responseData && responseData.length) {
+        res.send(responseData);
+      } else {
+        // throws a json error if the string isn't wrapped in stringify()
+        res.status(416).send(JSON.stringify(error.ERROR_416));
+      }
+    }).sort({'stix.created': -1});
+  } else {
+    // throws a json error if the string isn't wrapped in stringify()
+    res.status(406).send(JSON.stringify(error.ERROR_406));
+  }
+});
 
 app.listen(config.port, config.bind_address, () => {
   console.log(`TAXII 2.0 server listening on port ${config.port}`);
