@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "mocha -r ts-node/register src/test/test.ts"
+    "test": "mocha -r ts-node/register src/test/*.spec.ts"
   },
   "keywords": [
     "taxii",

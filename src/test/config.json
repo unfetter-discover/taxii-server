@@ -2,7 +2,7 @@
     "port": 3002,
     "accepts": ["application/vnd.oasis.taxii+json; version=2.0", "application/vnd.oasis.taxii+json", "application/vnd.oasis.stix+json; version=2.0", "application/vnd.oasis.stix+json"],
     "bind_address": "localhost",
-    "connection_string": "mongodb://localhost:27018/stix",
+    "connection_string": "mongodb://localhost:27018/",
     "response_type": {"taxii": "application/vnd.oasis.taxii+json; version=2.0", "stix": "application/vnd.oasis.stix+json; version=2.0"},
     "bundle_spec_version": "2.0",
     "discovery": {
@@ -11,6 +11,7 @@
             "contact": "string containing contact information",
             "default": "stix",
             "api_roots": [
+                "stix"
             ]
     },
     "autogenerate_roots": {
