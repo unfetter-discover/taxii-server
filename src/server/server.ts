@@ -128,7 +128,7 @@ app.get('/:root/collections', (req, res) => {
 
     if (rootCollections && rootCollections.length) {
       res.set('Content-Type', config.response_type.taxii);
-      res.send(rootCollections);
+      res.send({ 'collections': rootCollections });
     } else {
       res.status(416).send(error.ERROR_416);
     }
