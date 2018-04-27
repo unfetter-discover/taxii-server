@@ -1,39 +1,43 @@
-const express = require('express');
-const uuidv4 = require('uuid/v4');
+import * as express from 'express';
+import * as uuidv4 from 'uuid/v4';
 
-const mongoose = require('./init');
-const error = require('./errors/http-error');
-const helper = require('./helper');
-const collections = require('./collections');
+import mongoose from './init';
+import error from '../errors/http-error';
+import Helper from './helper';
+import * as objectSchema from '../models/object';
 
-const objectSchema = require('./models/object');
+import * as _config from '../assets/config.json';
+import * as _collections from '../assets/collections.json';
+import * as testConfig from '../test/config.json';
 
-const app = express();
-
-let config = require('./config');
-const testConfig = require('./test/config');
-
+let config: any;
+let collections: any = _collections;
 if (process.env.NODE_ENV === 'test') {
   config = testConfig;
+} else {
+  config = _config;
 }
+
+const app = express();
 
 mongoose.connect(config.connection_string);
 
 app.disable('x-powered-by');
 
-const validRoots = [];
-const rootKeys = Object.keys(config.discovery.api_roots);
-const rootValues = Object.values(config.discovery.api_roots);
+const validRoots: any[] = [];
+const rootKeys: any = Object.keys(config.discovery.api_roots);
+const rootValues: any = Object.values(config.discovery.api_roots);
 validRoots.push(config.discovery.default.split('/').pop());
+
 for (let i = 0; i < rootKeys.length; i += 1) {
   validRoots.push(rootValues[i].split('/').pop());
 }
 
-app.get('/taxii', (req, res) => {
+app.get('/taxii', (req: express.Request, res: express.Response) => {
   res.removeHeader('Accept-Ranges');
   res.removeHeader('Content-Range');
-  if (helper.isValidContentType(req, 'taxii')) {
-    const discovery = helper.cloneObject(Object.getOwnPropertyDescriptor(config, 'discovery'));
+  if (Helper.isValidContentType(req, 'taxii')) {
+    const discovery = { ...Object.getOwnPropertyDescriptor(config, 'discovery') };
     if (discovery) {
       res.set('Content-Type', config.response_type.taxii);
       discovery.value.default = `${req.protocol}://${req.get('host')}/${discovery.value.default}`;
@@ -49,15 +53,14 @@ app.get('/taxii', (req, res) => {
   }
 });
 
-
 app.get('/:root', (req, res) => {
   res.removeHeader('Accept-Ranges');
   res.removeHeader('Content-Range');
-  if (helper.isValidContentType(req, 'taxii')) {
-    let response;
+  if (Helper.isValidContentType(req, 'taxii')) {
+    let response: any;
     if (config.autogenerate_roots.enabled) {
       response = {};
-      if (helper.arrayContains(req.params.root, validRoots)) {
+      if (Helper.arrayContains(req.params.root, validRoots)) {
         response.title = req.params.root;
         response.max_content_length = config.autogenerate_roots.max_content_length;
         response.versions = config.autogenerate_roots.versions;
@@ -66,12 +69,12 @@ app.get('/:root', (req, res) => {
       }
     } else {
       const roots = Object.getOwnPropertyDescriptor(config, 'roots');
-      for (let i = 0; i < roots.value.length; i += 1) {
-        if (roots.value[i].path === req.params.root) {
-          response = helper.cloneObject(roots.value[i]);
+      roots.value.forEach((rootValue: any) => {
+        if (rootValue.path === req.params.root) {
+          response = { ...rootValue };
           delete response.path;
         }
-      }
+      });
     }
     if (response) {
       res.set('Content-Type', config.response_type.taxii);
@@ -91,7 +94,7 @@ app.get('/:root/collections', (req, res) => {
 
   let rootCollections = collections[req.params.root].collections;
 
-  if (helper.isValidContentType(req, 'taxii')) {
+  if (Helper.isValidContentType(req, 'taxii')) {
     if (req.get('range')) {
       if (req.get('range').indexOf('items') !== 0) {
         res.status(416).send(error.ERROR_416);
@@ -99,10 +102,10 @@ app.get('/:root/collections', (req, res) => {
       }
 
       const regExp = /\=(.*)\-/;
-      let firstElement = regExp.exec(req.get('range'));
-      let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
+      let firstElement: any = regExp.exec(req.get('range'));
+      let lastElement: any = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-      if(firstElement == null) {
+      if (firstElement == null) {
         res.status(416).send(error.ERROR_416);
         return;
       } else {
@@ -110,23 +113,22 @@ app.get('/:root/collections', (req, res) => {
         lastElement = parseInt(lastElement, 10) + 1;
         if (isNaN(lastElement)) {
           rootCollections = rootCollections.slice(firstElement);
-        }
-        else {
+        } else {
           rootCollections = rootCollections.slice(firstElement, lastElement);
         }
         res.status(206);
       }
     }
 
-    for (let i = 0; i < rootCollections.length; i += 1) {
-      rootCollections[i].can_read = 'true';
-      rootCollections[i].can_write = 'false';
-      rootCollections[i].media_types = ['application/vnd.oasis.stix+json; version=2.0'];
-    }
+    rootCollections.forEach((rootCollection: any) => {
+      rootCollection.can_read = 'true';
+      rootCollection.can_write = 'false';
+      rootCollection.media_types = ['application/vnd.oasis.stix+json; version=2.0'];
+    });
 
     if (rootCollections && rootCollections.length) {
       res.set('Content-Type', config.response_type.taxii);
-      res.send(rootCollections);
+      res.send({ 'collections': rootCollections });
     } else {
       res.status(416).send(error.ERROR_416);
     }
@@ -147,26 +149,26 @@ app.get('/:root/collections/:id', (req, res) => {
   const rootCollections = collections[req.params.root].collections;
   let isCollectionValid;
 
-  for (let i = 0; i < rootCollections.length; i += 1) {
-    if (req.params.id === rootCollections[i].id) {
+  rootCollections.forEach((rootCollection: any) => {
+    if (req.params.id === rootCollection.id) {
       isCollectionValid = true;
     }
-  }
+  });
 
   if (!isCollectionValid) {
     res.status(404).send(error.ERROR_404);
   }
 
-  if (helper.isValidContentType(req, 'taxii')) {
-    for (let i = 0; i < rootCollections.length; i += 1) {
-      if (rootCollections[i].id === req.params.id) {
-        match = rootCollections[i];
+  if (Helper.isValidContentType(req, 'taxii')) {
+    rootCollections.forEach((rootCollection: any) => {
+      if (rootCollection.id === req.params.id) {
+        match = rootCollection;
         // these are hardcoded for response until write access is implemented
         match.can_read = 'true';
         match.can_write = 'false';
         match.media_types = ['application/vnd.oasis.stix+json; version=2.0'];
       }
-    }
+    });
     if (match) {
       res.set('Content-Type', config.response_type.taxii);
       res.send(match);
@@ -181,7 +183,7 @@ app.get('/:root/collections/:id', (req, res) => {
 app.get('/:root/collections/:id/objects', (req, res) => {
   res.set('Accept-Ranges', 'items');
 
-  if (helper.isValidContentType(req, 'stix')) {
+  if (Helper.isValidContentType(req, 'stix')) {
     let obj;
 
     if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
@@ -191,25 +193,25 @@ app.get('/:root/collections/:id/objects', (req, res) => {
       return;
     }
 
-    obj.find({ 'metaProperties.collection': req.params.id }, (err, data) => {
+    obj.find({ 'metaProperties.collection': req.params.id }, (err: any, data: any) => {
       res.set('Content-Type', config.response_type.stix);
       if (data && data.length) {
         let responseData = data;
 
         if (req.query.match) {
           if (req.query.match.id) {
-            responseData = helper.filterId(req.query.match.id, JSON.parse(JSON.stringify(data)));
+            responseData = Helper.filterId(req.query.match.id, JSON.parse(JSON.stringify(data)));
           }
 
           if (req.query.match.type) {
-            responseData = helper.filterType(
+            responseData = Helper.filterType(
               req.query.match.type,
               JSON.parse(JSON.stringify(data)),
             );
           }
 
           if (req.query.match.version) {
-            responseData = helper.filterVersion(
+            responseData = Helper.filterVersion(
               req.query.match.version,
               JSON.parse(JSON.stringify(data)),
             );
@@ -240,10 +242,10 @@ app.get('/:root/collections/:id/objects', (req, res) => {
           }
 
           const regExp = /\=(.*)\-/;
-          let firstElement = regExp.exec(req.get('range'));
-          let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
+          let firstElement: any = regExp.exec(req.get('range'));
+          let lastElement: any = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-          if(firstElement == null) {
+          if (firstElement == null) {
             res.status(416).send(error.ERROR_416);
             return;
           } else {
@@ -251,8 +253,7 @@ app.get('/:root/collections/:id/objects', (req, res) => {
             lastElement = parseInt(lastElement, 10) + 1;
             if (isNaN(lastElement)) {
               responseData = responseData.slice(firstElement);
-            }
-            else {
+            } else {
               responseData = responseData.slice(firstElement, lastElement);
             }
             res.status(206);
@@ -286,7 +287,7 @@ app.get('/:root/collections/:id/objects', (req, res) => {
 app.get('/:root/collections/:id/objects/:objectid', (req, res) => {
   res.removeHeader('Accept-Ranges');
   res.removeHeader('Content-Range');
-  if (helper.isValidContentType(req, 'stix')) {
+  if (Helper.isValidContentType(req, 'stix')) {
     let objects;
 
     if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
@@ -296,12 +297,12 @@ app.get('/:root/collections/:id/objects/:objectid', (req, res) => {
       return;
     }
 
-    objects.find({ 'metaProperties.collection': req.params.id, 'stix.id': req.params.objectid }, (err, data) => {
+    objects.find({ 'metaProperties.collection': req.params.id, 'stix.id': req.params.objectid }, (err: any, data: any) => {
       res.set('Content-Type', config.response_type.stix);
       let responseData = JSON.parse(JSON.stringify(data));
       if (req.query.match) {
         if (req.query.match.version) {
-          responseData = helper.filterVersion(
+          responseData = Helper.filterVersion(
             req.query.match.version,
             JSON.parse(JSON.stringify(data)),
           );
@@ -343,7 +344,7 @@ app.get('/:root/collections/:id/objects/:objectid', (req, res) => {
 });
 
 app.get('/:root/collections/:id/manifest', (req, res) => {
-  if (helper.isValidContentType(req, 'taxii')) {
+  if (Helper.isValidContentType(req, 'taxii')) {
     let objects;
 
     if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
@@ -353,7 +354,7 @@ app.get('/:root/collections/:id/manifest', (req, res) => {
       return;
     }
 
-    objects.find({ 'metaProperties.collection': req.params.id }, '-_id', (err, data) => {
+    objects.find({ 'metaProperties.collection': req.params.id }, '-_id', (err: any, data: any) => {
       res.set('Content-Type', config.response_type.taxii);
 
       let responseData = JSON.parse(JSON.stringify(data));
@@ -365,18 +366,18 @@ app.get('/:root/collections/:id/manifest', (req, res) => {
 
       if (req.query.match) {
         if (req.query.match.id) {
-          responseData = helper.filterId(req.query.match.id, JSON.parse(JSON.stringify(responseData)));
+          responseData = Helper.filterId(req.query.match.id, JSON.parse(JSON.stringify(responseData)));
         }
 
         if (req.query.match.type) {
-          responseData = helper.filterType(
+          responseData = Helper.filterType(
             req.query.match.type,
             JSON.parse(JSON.stringify(responseData)),
           );
         }
 
         if (req.query.match.version) {
-          responseData = helper.filterVersion(
+          responseData = Helper.filterVersion(
             req.query.match.version,
             JSON.parse(JSON.stringify(responseData)),
           );
@@ -390,10 +391,10 @@ app.get('/:root/collections/:id/manifest', (req, res) => {
         }
 
         const regExp = /\=(.*)\-/;
-        let firstElement = regExp.exec(req.get('range'));
-        let lastElement = req.get('range').substring(req.get('range').indexOf('-') + 1);
+        let firstElement: any = regExp.exec(req.get('range'));
+        let lastElement: any = req.get('range').substring(req.get('range').indexOf('-') + 1);
 
-        if(firstElement == null) {
+        if (firstElement == null) {
           res.status(416).send(error.ERROR_416);
           return;
         } else {
@@ -401,8 +402,7 @@ app.get('/:root/collections/:id/manifest', (req, res) => {
           lastElement = parseInt(lastElement, 10) + 1;
           if (isNaN(lastElement)) {
             responseData = responseData.slice(firstElement);
-          }
-          else {
+          } else {
             responseData = responseData.slice(firstElement, lastElement);
           }
           res.status(206);
@@ -443,7 +443,7 @@ app.listen(config.port, config.bind_address, () => {
   console.log(`TAXII 2.0 server listening on port ${config.port}`);
 });
 
-app.use((err, req, res, next) => {
+app.use((err: any, req: express.Request, res: express.Response, next: any) => {
   if (err) {
     res.status(500).send(error.ERROR_500);
     next(err);

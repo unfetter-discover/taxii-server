@@ -22,7 +22,8 @@ const ERROR_500 = {
   http_status: 500,
 };
 
-
-module.exports = {
+const HttpError: any = {
   ERROR_404, ERROR_406, ERROR_416, ERROR_500,
 };
+
+export default HttpError;
