@@ -12,6 +12,8 @@ import * as _config from '../assets/config.json';
 import * as _collections from '../assets/collections.json';
 import * as testConfig from '../test/config.json';
 import RequestAdatper from '../adapters/request-adapter';
+import { IStix, IUFStix } from '../models/interfaces';
+import { Model } from 'mongoose';
 
 let config: any;
 let collections: any = _collections;
@@ -187,11 +189,7 @@ TaxiiController.get('/:root/collections/:id/objects', (req: Request, res: Respon
             return res.status(404).send(error.ERROR_404);
         }
 
-        let model = mongoose[`${req.params.root}_conn`].model('Objects', objectSchema, 'stix');
-
-        console.log('~~~~', req.query.match);
-        console.log('####', RequestAdatper.generateFilter(req));
-        console.log('&&&&&', RequestAdatper.generateSkipLimit(req));
+        const model: Model<any> = mongoose[`${req.params.root}_conn`].model('Objects', objectSchema, 'stix');
 
         const filter = {
             'metaProperties.collection': req.params.id,
@@ -200,50 +198,39 @@ TaxiiController.get('/:root/collections/:id/objects', (req: Request, res: Respon
 
         const { skip, limit } = RequestAdatper.generateSkipLimit(req);
 
-        model.find(filter, (err: any, data: any) => {
-            res.set('Content-Type', config.response_type.stix);
-            if (data && data.length) {
-                let responseData = data;
-
-                for (let i = 0; i < responseData.length; i += 1) {
-                    responseData[i] = JSON.parse(JSON.stringify(responseData[i]));
-
-                    let extendedProperties = null;
-                    if (responseData[i].extendedProperties) {
-                        extendedProperties = responseData[i].extendedProperties;
-                    }
-
-                    if (responseData[i].stix) {
-                        responseData[i] = responseData[i].stix;
-                    }
-
-                    if (extendedProperties) {
-                        responseData[i] = Object.assign({}, responseData[i], extendedProperties);
-                    }
+        model
+            .find(filter, (err: any, data: any) => {
+                res.set('Content-Type', config.response_type.stix);
+                if (err || !data || !data.length) {
+                    return res.status(404).send(JSON.stringify(error.ERROR_404));
                 }
 
-                if (responseData && responseData.length) {
-                    res.set('Content-Type', config.response_type.stix);
-                    // transform array to bundle
-                    const bundle = {
-                        type: 'bundle',
-                        id: 'bundle--' + uuidv4(),
-                        spec_version: config.bundle_spec_version,
-                        objects: responseData,
-                    };
-                    res.send(bundle);
-                } else {
-                    // throws a json error if the string isn't wrapped in stringify()
-                    res.status(416).send(JSON.stringify(error.ERROR_416));
+                const responseData: IStix[]  = data
+                    .map((datum: any): IUFStix => datum.toObject())
+                    .map((datum: IUFStix): IStix => {
+                        return {
+                            ...datum.stix,
+                            ...datum.extendedProperties
+                        };
+                    });
+
+                if (!responseData || !responseData.length) {
+                    return res.status(416).json(error.ERROR_416);
                 }
-            } else {
-                // throws a json error if the string isn't wrapped in stringify()
-                res.status(404).send(JSON.stringify(error.ERROR_404));
-            }
-        })
-        .sort({ 'stix.created': -1 })
-        .skip(skip)
-        .limit(limit);
+
+                res.set('Content-Type', config.response_type.stix);
+                // transform array to bundle
+                const bundle = {
+                    type: 'bundle',
+                    id: 'bundle--' + uuidv4(),
+                    spec_version: config.bundle_spec_version,
+                    objects: responseData,
+                };
+                return res.send(bundle);               
+            })
+            .sort({ 'stix.created': -1 })
+            .skip(skip)
+            .limit(limit);
 
     } else {
         res.status(406).send(error.ERROR_406);

@@ -1,6 +1,12 @@
 import { Request } from 'express';
 
 export default class RequestAdatper {
+    
+    /**
+     * @param  {Request} req
+     * @returns any
+     * @description Generates the filter for mongo queries
+     */
     public static generateFilter(req: Request): any {
         const mongoFilter: any = {};
 
@@ -26,11 +32,40 @@ export default class RequestAdatper {
             // }
         }
 
-        console.log('%%%%%', req.get('range'));
+        if (req.headers['x-taxii-date-added-first']) {
+            const addedFirst = new Date(req.headers['x-taxii-date-added-first'] as string);
+            if (!isNaN(addedFirst.getTime())) {
+                mongoFilter['stix.created'] = {
+                    $gte: addedFirst
+                }
+            }
+        }
+
+        if (req.headers['x-taxii-date-added-last']) {
+            const addedLast = new Date(req.headers['x-taxii-date-added-last'] as string);
+            if (!isNaN(addedLast.getTime())) {
+                if (mongoFilter['stix.created']) {
+                    mongoFilter['stix.created'] = { 
+                        ...mongoFilter['stix.created'],
+                        $lte: addedLast
+                    };
+                } else {
+                    mongoFilter['stix.created'] = {
+                        $lte: addedLast
+                    };
+                }
+            }
+        }
 
         return mongoFilter;
     }
 
+    /**
+     * @param  {Request} req
+     * @returns {{ skip: any, limit: any }}
+     * @description Returns the `skip` and `limit` numbers for mongo from the request headers
+     *      Usages: const { skip, limit } = generateSkipLimit(req);
+     */
     public static generateSkipLimit(req: Request): { skip: any, limit: any } {
         const range = req.get('range');
         if (range) {

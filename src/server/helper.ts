@@ -45,6 +45,7 @@ export default class Helper {
    * @param  {any} id
    * @param  {any[]} data
    * @returns any
+   * @deprecated remove after filter is complete
    */
   public static filterId(id: any, data: any[]): any[] {
     const responseData: any[] = [];
@@ -71,6 +72,7 @@ export default class Helper {
    * @param  {any} type
    * @param  {any[]} data
    * @returns any
+   * @deprecated remove after filter is complete
    */
   public static filterType(type: any, data: any[]): any[] {
     const responseData: any[] = [];
@@ -97,6 +99,7 @@ export default class Helper {
    * @param  {any} version
    * @param  {any[]} data
    * @returns any
+   * @deprecated remove after filter is complete
    */
   public static filterVersion(version: any, data: any[]): any[] {
     let responseData = data;
