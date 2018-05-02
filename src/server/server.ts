@@ -2,8 +2,10 @@ import * as express from 'express';
 import * as uuidv4 from 'uuid/v4';
 
 import mongoose from './init';
+import * as spdy from 'spdy';
 import error from '../errors/http-error';
 import Helper from './helper';
+import * as fs from 'fs';
 import * as objectSchema from '../models/object';
 
 import * as _config from '../assets/config.json';
@@ -439,15 +441,46 @@ app.get('/:root/collections/:id/manifest', (req, res) => {
   }
 });
 
-app.listen(config.port, config.bind_address, () => {
-  console.log(`TAXII 2.0 server listening on port ${config.port}`);
-});
-
 app.use((err: any, req: express.Request, res: express.Response, next: any) => {
   if (err) {
     res.status(500).send(error.ERROR_500);
     next(err);
   }
 });
+
+// ~~~ http2 Server ~~~
+
+const server = spdy.createServer({
+  key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
+  cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
+}, app);
+
+server.on('error', (errorObj: any) => {
+  if (errorObj.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof config.port === 'string'
+    ? 'Pipe ' + config.port
+    : 'Port ' + config.port;
+
+  // handle specific listen errors with friendly messages
+  switch (errorObj.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+});
+
+server.on('listening', () => console.log(`TAXII 2.0 server listening on port ${server.address().port}`));
+
+server.listen(config.port);
 
 module.exports = app;
