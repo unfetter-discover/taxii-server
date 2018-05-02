@@ -1,6 +1,5 @@
 import * as express from 'express';
 
-import mongoose from './init';
 import * as spdy from 'spdy';
 import error from '../errors/http-error';
 import * as fs from 'fs';
@@ -9,6 +8,7 @@ import TaxiiController from '../controllers/taxii-controller';
 import * as _config from '../assets/config.json';
 import * as _collections from '../assets/collections.json';
 import * as testConfig from '../test/config.json';
+import mongoInit from './mongoinit';
 
 let config: any;
 let collections: any = _collections;
@@ -19,8 +19,6 @@ if (process.env.NODE_ENV === 'test') {
 }
 
 const app = express();
-
-mongoose.connect(config.connection_string);
 
 app.disable('x-powered-by');
 
@@ -42,39 +40,51 @@ app.use((err: any, req: express.Request, res: express.Response, next: any) => {
   }
 });
 
-// ~~~ http2 Server ~~~
+/**
+ * @description Start http2 server after connected to mongodb
+ */
+async function startServer() {
+  try {
+    const dbConnMsg = await mongoInit(config.connection_string);
+    console.log(dbConnMsg);
 
-const server = spdy.createServer({
-  key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
-  cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
-}, app);
+    const server = spdy.createServer({
+      key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
+      cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
+    }, app);
 
-server.on('error', (errorObj: any) => {
-  if (errorObj.syscall !== 'listen') {
-    throw error;
+    server.on('error', (errorObj: any) => {
+      if (errorObj.syscall !== 'listen') {
+        throw error;
+      }
+
+      const bind = typeof config.port === 'string'
+        ? 'Pipe ' + config.port
+        : 'Port ' + config.port;
+
+      // handle specific listen errors with friendly messages
+      switch (errorObj.code) {
+        case 'EACCES':
+          console.error(bind + ' requires elevated privileges');
+          process.exit(1);
+          break;
+        case 'EADDRINUSE':
+          console.error(bind + ' is already in use');
+          process.exit(1);
+          break;
+        default:
+          throw error;
+      }
+    });
+
+    server.on('listening', () => console.log(`TAXII 2.0 server listening on port ${server.address().port}`));
+
+    server.listen(config.port);
+  } catch (error) {
+    console.log('Error: ', error);
   }
+}
 
-  const bind = typeof config.port === 'string'
-    ? 'Pipe ' + config.port
-    : 'Port ' + config.port;
-
-  // handle specific listen errors with friendly messages
-  switch (errorObj.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
-});
-
-server.on('listening', () => console.log(`TAXII 2.0 server listening on port ${server.address().port}`));
-
-server.listen(config.port);
+startServer();
 
 module.exports = app;
