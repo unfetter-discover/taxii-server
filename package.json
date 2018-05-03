@@ -10,6 +10,7 @@
     "docs": "typedoc --out tsdocs --ignoreCompilerErrors --exclude '**/*.spec.ts' src/",
     "lint": "tslint src/**/*.ts",
     "start": "ts-node src/server/server.ts",
+    "start:dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server/server.ts",
     "test": "mocha -r ts-node/register src/test/*.spec.ts"
   },
   "nyc": {
@@ -45,6 +46,7 @@
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
     "mocha": "^5.1.1",
+    "nodemon": "^1.17.3",
     "nyc": "^11.7.1",
     "rimraf": "^2.6.2",
     "source-map-support": "^0.5.5",

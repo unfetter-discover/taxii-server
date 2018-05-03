@@ -3,6 +3,8 @@ import { Request } from 'express';
 import * as config from '../assets/config.json';
 
 export default class Helper {
+
+  public static readonly stixIdRegex: RegExp = /^[a-z][a-z-]+[a-z]--[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
   
   /**
    * @param  {Request} req
@@ -45,6 +47,7 @@ export default class Helper {
    * @param  {any} id
    * @param  {any[]} data
    * @returns any
+   * @deprecated remove after filter is complete
    */
   public static filterId(id: any, data: any[]): any[] {
     const responseData: any[] = [];
@@ -71,6 +74,7 @@ export default class Helper {
    * @param  {any} type
    * @param  {any[]} data
    * @returns any
+   * @deprecated remove after filter is complete
    */
   public static filterType(type: any, data: any[]): any[] {
     const responseData: any[] = [];
@@ -97,6 +101,7 @@ export default class Helper {
    * @param  {any} version
    * @param  {any[]} data
    * @returns any
+   * @deprecated remove after filter is complete
    */
   public static filterVersion(version: any, data: any[]): any[] {
     let responseData = data;
@@ -193,5 +198,20 @@ export default class Helper {
       });
     }
     return maxSize;
+  }
+
+  /**
+   * @param  {string[]} ids
+   * @returns boolean
+   * @description Verifies the presence of a valid STIX ID in a string array
+   */
+  public static validateStixIds(ids: string[]): boolean {
+    let retVal: boolean = false;    
+    for (const id of ids) {
+      if (id.match(this.stixIdRegex)) {
+        retVal = true;
+      }
+    }
+    return retVal;
   }
 }

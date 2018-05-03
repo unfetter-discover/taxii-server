@@ -24,12 +24,12 @@ describe('/GET :root/collections', () => {
                 res.should.have.status(200);
                 res.should.have.header('content-type', 'application/vnd.oasis.taxii+json; charset=utf-8; version=2.0');
                 res.should.be.a('object');
-                res.body[0].should.have.property('id', '95ecc380-afe9-11e4-9b6c-751b66dd541e');
-                res.body[0].should.have.property('title', 'Enterprise ATT&CK');
-                res.body[0].should.have.property('description', 'This data collection holds STIX objects from Enterprise ATT&CK');
-                res.body[0].should.have.property('can_read', 'true');
-                res.body[0].should.have.property('can_write', 'false');
-                res.body[0].should.have.property('media_types');
+                res.body.collections[0].should.have.property('id', '95ecc380-afe9-11e4-9b6c-751b66dd541e');
+                res.body.collections[0].should.have.property('title', 'Enterprise ATT&CK');
+                res.body.collections[0].should.have.property('description', 'This data collection holds STIX objects from Enterprise ATT&CK');
+                res.body.collections[0].should.have.property('can_read', 'true');
+                res.body.collections[0].should.have.property('can_write', 'false');
+                res.body.collections[0].should.have.property('media_types');
                 done();
             })
     })
@@ -42,13 +42,13 @@ describe('/GET :root/collections', () => {
                 res.should.have.status(206);
                 res.should.have.header('content-type', 'application/vnd.oasis.taxii+json; charset=utf-8; version=2.0');
                 res.should.be.a('object');
-                res.body.should.have.length(2);
-                res.body[0].should.have.property('id', '95ecc380-afe9-11e4-9b6c-751b66dd541e');
-                res.body[0].should.have.property('title', 'Enterprise ATT&CK');
-                res.body[0].should.have.property('description', 'This data collection holds STIX objects from Enterprise ATT&CK');
-                res.body[0].should.have.property('can_read', 'true');
-                res.body[0].should.have.property('can_write', 'false');
-                res.body[0].should.have.property('media_types');
+                res.body.collections.should.have.length(2);
+                res.body.collections[0].should.have.property('id', '95ecc380-afe9-11e4-9b6c-751b66dd541e');
+                res.body.collections[0].should.have.property('title', 'Enterprise ATT&CK');
+                res.body.collections[0].should.have.property('description', 'This data collection holds STIX objects from Enterprise ATT&CK');
+                res.body.collections[0].should.have.property('can_read', 'true');
+                res.body.collections[0].should.have.property('can_write', 'false');
+                res.body.collections[0].should.have.property('media_types');
                 done();
             })
     })
@@ -62,17 +62,16 @@ describe('/GET :root/collections', () => {
                 done();
             })
     })
-    // TODO fix this test
-    // it('it should GET /stix collections info using pagination with invalid syntax in the range header (error 500)', (done) => {
-    //   chai.request(server)
-    //     .get('/stix/collections')
-    //     .set('accept', 'application/vnd.oasis.taxii+json; version=2.0')
-    //     .set('range', 'foo=-20-xyz')
-    //     .end((err: any, res: any) => {
-    //       res.should.have.status(500);
-    //       done();
-    //     })
-    // })
+    it('it should GET /stix collections info using pagination with invalid syntax in the range header (error 416)', (done) => {
+      chai.request(server)
+        .get('/stix/collections')
+        .set('accept', 'application/vnd.oasis.taxii+json; version=2.0')
+        .set('range', 'foo=-20-xyz')
+        .end((err: any, res: any) => {
+          res.should.have.status(416);
+          done();
+        })
+    })
     it('it should GET /stix collections info with an invalid content type (error 406)', (done) => {
         chai.request(server)
             .get('/stix/collections')

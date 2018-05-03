@@ -24,11 +24,11 @@ if (process.env.NODE_ENV === 'test') {
 const discovery = Object.getOwnPropertyDescriptor(config, 'discovery');
 let apiRoot = discovery.value.default.split('/').pop();
 
-mongoose[`${apiRoot}_conn`] = mongoose.createConnection(config.connection_string + apiRoot);
+mongoose[`${apiRoot}_conn`] = _mongoose.createConnection(config.connection_string + apiRoot);
 
 discovery.value.api_roots.forEach((rawApiRoot: any) => {
   apiRoot = rawApiRoot.split('/').pop();
-  mongoose[`${apiRoot}_conn`] = mongoose.createConnection(config.connection_string + apiRoot);
+  mongoose[`${apiRoot}_conn`] = _mongoose.createConnection(config.connection_string + apiRoot);
 });
 
 collections.stix.collections.forEach((stixCollection: any) => {
