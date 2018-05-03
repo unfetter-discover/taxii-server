@@ -1,0 +1,38 @@
+version: '3.3'
+services:
+  unfetter-discover-openssl:
+    image: svagi/openssl:latest
+    container_name: unfetter-discover-openssl
+    entrypoint:
+     - openssl
+     - req
+     - -subj
+     - /CN=localhost/DC=localhost/DC=localdomain
+     - -new
+     - -newkey
+     - rsa:2048
+     - -days
+     - "365"
+     - -nodes
+     - -x509
+     - -keyout
+     - /tmp/certs/server.key
+     - -out
+     - /tmp/certs/server.crt
+    volumes:
+     - ./certs/:/tmp/certs
+
+  cti-stix-store-repository:
+    image: mongo:3.4.1
+    container_name: cti-stix-store-repository
+    volumes:
+    - ./data/db:/data/db
+
+  unfetter-taxii-server:
+    build: ../taxii-server
+    container_name: unfetter-taxii-server
+    image: unfetter-taxii-server
+    links:
+     - cti-stix-store-repository:repository
+    volumes:
+     - ./certs/:/etc/pki/tls/certs

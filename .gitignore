@@ -7,3 +7,5 @@ tsdocs/
 dist/
 .eslintrc
 .vscode
+certs/
+data/
