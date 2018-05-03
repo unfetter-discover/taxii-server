@@ -189,7 +189,6 @@ TaxiiController.get('/:root/collections/:id/objects', (req: Request, res: Respon
             return res.status(404).send(error.ERROR_404);
         }
 
-        // const model: Model<any> = mongoose[`${req.params.root}_conn`].model('Objects', MongooseModels.stixSchema, 'stix');
         const model: Model<any> = MongooseModels.getStixModel(mongoose[`${req.params.root}_conn`]);
 
         const filter = {
@@ -197,7 +196,21 @@ TaxiiController.get('/:root/collections/:id/objects', (req: Request, res: Respon
             ...RequestAdatper.generateFilter(req)
         };
 
+        // Invalid ID
+        if (filter._id && filter._id.$in && !Helper.validateStixIds(filter._id.$in)) {
+            return res.status(416).json(error.ERROR_416);
+        }
+
         const { skip, limit } = RequestAdatper.generateSkipLimit(req);
+
+        // invalid range
+        if (
+            (limit && (limit < 0 || isNaN(limit))) || 
+            (skip && isNaN(skip)) || 
+            (req.get('range') && !req.get('range').match(/items=.*/))
+        ) {
+            return res.status(416).json(error.ERROR_416);
+        }
 
         model
             .find(filter, (err: any, data: any) => {
@@ -214,9 +227,14 @@ TaxiiController.get('/:root/collections/:id/objects', (req: Request, res: Respon
                             ...datum.extendedProperties
                         };
                     });
-
+                console.log('$$$$', responseData.length, '%%%%%', filter);
                 if (!responseData || !responseData.length) {
                     return res.status(416).json(error.ERROR_416);
+                }
+
+                // Set 
+                if (skip || limit) {
+                    res.status(206);
                 }
 
                 res.set('Content-Type', config.response_type.stix);
@@ -245,7 +263,6 @@ TaxiiController.get('/:root/collections/:id/objects/:objectid', (req: Request, r
         let objects;
 
         if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
-            // objects = mongoose[`${req.params.root}_conn`].model('Objects', MongooseModels.stixSchema, 'stix');
             objects = MongooseModels.getStixModel(mongoose[`${req.params.root}_conn`]);
         } else {
             res.status(404).send(error.ERROR_404);
@@ -303,7 +320,6 @@ TaxiiController.get('/:root/collections/:id/manifest', (req: Request, res: Respo
         let objects;
 
         if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
-            // objects = mongoose[`${req.params.root}_conn`].model('Objects', MongooseModels.stixSchema, 'stix');
             objects = MongooseModels.getStixModel(mongoose[`${req.params.root}_conn`]);
         } else {
             res.status(404).send(error.ERROR_404);

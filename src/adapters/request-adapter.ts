@@ -70,7 +70,7 @@ export default class RequestAdatper {
                     .map((numStr) => parseInt(numStr));
 
                 if (splitNums.length > 1) {
-                    const limit = splitNums[1] - splitNums[0];
+                    const limit = splitNums[1] - splitNums[0] + 1;
                     return {
                         skip: splitNums[0],
                         limit
