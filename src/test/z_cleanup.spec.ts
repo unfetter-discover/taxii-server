@@ -16,7 +16,15 @@ describe('cleanup', () => {
                 if (err) {
                     throw err;
                 }
-                done();
+                mongoose.connections.forEach((conn: any) => conn.close());
+                if (global.server) {
+                    global.server.close(() => {
+                        console.log('Closing server');
+                        done();
+                    })
+                } else {
+                    done();
+                }
             });
     });
 });

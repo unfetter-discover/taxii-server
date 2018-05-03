@@ -5,6 +5,7 @@ declare module "*.json" {
 
 declare module NodeJS {
     interface Global {
-        unfetterconfigurations: any
+        unfetterconfigurations: any,
+        server: any
     }
 }

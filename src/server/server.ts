@@ -48,12 +48,12 @@ async function startServer() {
     const dbConnMsg = await mongoInit(config.connection_string);
     console.log(dbConnMsg);
 
-    const server = spdy.createServer({
+    global.server = spdy.createServer({
       key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
       cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
     }, app);
 
-    server.on('error', (errorObj: any) => {
+    global.server.on('error', (errorObj: any) => {
       if (errorObj.syscall !== 'listen') {
         throw error;
       }
@@ -77,9 +77,9 @@ async function startServer() {
       }
     });
 
-    server.on('listening', () => console.log(`TAXII 2.0 server listening on port ${server.address().port}`));
+    global.server.on('listening', () => console.log(`TAXII 2.0 server listening on port ${global.server.address().port}`));
 
-    server.listen(config.port);
+    global.server.listen(config.port);
   } catch (error) {
     console.log('Error: ', error);
   }

@@ -227,7 +227,7 @@ TaxiiController.get('/:root/collections/:id/objects', (req: Request, res: Respon
                             ...datum.extendedProperties
                         };
                     });
-                console.log('$$$$', responseData.length, '%%%%%', filter);
+                
                 if (!responseData || !responseData.length) {
                     return res.status(416).json(error.ERROR_416);
                 }
