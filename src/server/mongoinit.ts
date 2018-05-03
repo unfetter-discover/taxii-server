@@ -44,7 +44,6 @@ export default function mongoInit(connString: string): Promise<string> {
         const db = mongoose.connection;
         
         db.on('connected', () => {
-            // resolve(`Connected to mongodb at ${connString}`)
             getConfig()
                 .then((msg: string) => {
                     console.log(msg);

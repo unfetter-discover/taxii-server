@@ -6,7 +6,6 @@ import * as spdy from 'spdy';
 import error from '../errors/http-error';
 import Helper from '../server/helper';
 import * as fs from 'fs';
-import * as objectSchema from '../models/object';
 
 import * as _config from '../assets/config.json';
 import * as _collections from '../assets/collections.json';
@@ -14,6 +13,7 @@ import * as testConfig from '../test/config.json';
 import RequestAdatper from '../adapters/request-adapter';
 import { IStix, IUFStix } from '../models/interfaces';
 import { Model } from 'mongoose';
+import MongooseModels from '../models/mongoose-models';
 
 let config: any;
 let collections: any = _collections;
@@ -189,7 +189,8 @@ TaxiiController.get('/:root/collections/:id/objects', (req: Request, res: Respon
             return res.status(404).send(error.ERROR_404);
         }
 
-        const model: Model<any> = mongoose[`${req.params.root}_conn`].model('Objects', objectSchema, 'stix');
+        // const model: Model<any> = mongoose[`${req.params.root}_conn`].model('Objects', MongooseModels.stixSchema, 'stix');
+        const model: Model<any> = MongooseModels.getStixModel(mongoose[`${req.params.root}_conn`]);
 
         const filter = {
             'metaProperties.collection': req.params.id,
@@ -244,7 +245,8 @@ TaxiiController.get('/:root/collections/:id/objects/:objectid', (req: Request, r
         let objects;
 
         if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
-            objects = mongoose[`${req.params.root}_conn`].model('Objects', objectSchema, 'stix');
+            // objects = mongoose[`${req.params.root}_conn`].model('Objects', MongooseModels.stixSchema, 'stix');
+            objects = MongooseModels.getStixModel(mongoose[`${req.params.root}_conn`]);
         } else {
             res.status(404).send(error.ERROR_404);
             return;
@@ -301,7 +303,8 @@ TaxiiController.get('/:root/collections/:id/manifest', (req: Request, res: Respo
         let objects;
 
         if (Object.prototype.hasOwnProperty.call(mongoose, `${req.params.root}_conn`)) {
-            objects = mongoose[`${req.params.root}_conn`].model('Objects', objectSchema, 'stix');
+            // objects = mongoose[`${req.params.root}_conn`].model('Objects', MongooseModels.stixSchema, 'stix');
+            objects = MongooseModels.getStixModel(mongoose[`${req.params.root}_conn`]);
         } else {
             res.status(404).send(error.ERROR_404);
             return;
