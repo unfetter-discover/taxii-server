@@ -31,9 +31,20 @@ for (let i = 0; i < rootKeys.length; i += 1) {
   validRoots.push(rootValues[i].split('/').pop());
 }
 
+// Verify certificate
+if (config.ssl) {
+  app.use((req: express.Request | any, res: express.Response, next: express.NextFunction) => {
+    // Cert is not present
+    if (!req.client.authorized) {
+      return res.status(401).send('User is not authorized');
+    }
+    next();
+  });
+}
+
 app.use('/', TaxiiController);
 
-app.use((err: any, req: express.Request, res: express.Response, next: any) => {
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (err) {
     res.status(500).send(error.ERROR_500);
     next(err);
@@ -46,12 +57,25 @@ app.use((err: any, req: express.Request, res: express.Response, next: any) => {
 async function startServer() {
   try {
     const dbConnMsg = await mongoInit(config.connection_string);
-    console.log(dbConnMsg);
 
-    global.server = spdy.createServer({
-      key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
-      cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
-    }, app);
+    let serverOptions: object;
+
+    if (config.ssl) {
+      serverOptions = {
+        key: fs.readFileSync(config.ssl.keyPath),
+        cert: fs.readFileSync(config.ssl.certPath),
+        ca: fs.readFileSync(config.ssl.caPath),
+        requestCert: true,
+        rejectUnauthorized: false
+      };
+    } else {
+      serverOptions = {
+        key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
+        cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
+      };
+    }
+
+    global.server = spdy.createServer(serverOptions, app);
 
     global.server.on('error', (errorObj: any) => {
       if (errorObj.syscall !== 'listen') {
