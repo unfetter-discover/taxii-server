@@ -36,3 +36,6 @@ services:
      - cti-stix-store-repository:repository
     volumes:
      - ./certs/:/etc/pki/tls/certs
+    entrypoint:
+     - npm
+     - start

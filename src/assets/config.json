@@ -33,5 +33,10 @@
         "versions": ["taxii-2.0"],
         "max_content_length": "10485760",
         "path": "stix"
-    }]
+    }],
+    "ssl": {
+        "keyPath": "/Users/jason/coding/unfetter/taxii-server/certs/server-key.pem",
+        "certPath": "/Users/jason/coding/unfetter/taxii-server/certs/server-crt.pem",
+        "caPath": "/Users/jason/coding/unfetter/taxii-server/certs/ca_client-crt.pem"
+    }
 }
