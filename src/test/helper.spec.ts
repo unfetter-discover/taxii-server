@@ -1,9 +1,8 @@
 import { Request } from 'express';
-import Helper from '../server/helper';
-
-import * as _config from '../assets/config.json';
 import { expect } from 'chai';
-const config: any = _config;
+
+import config from '../services/config.service';
+import Helper from '../server/helper';
 
 describe('Helper', () => {
 

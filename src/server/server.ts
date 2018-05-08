@@ -4,19 +4,12 @@ import * as spdy from 'spdy';
 import error from '../errors/http-error';
 import * as fs from 'fs';
 import TaxiiController from '../controllers/taxii-controller';
+import config from '../services/config.service';
 
-import * as _config from '../assets/config.json';
 import * as _collections from '../assets/collections.json';
-import * as testConfig from '../test/config.json';
 import mongoInit from './mongoinit';
 
-let config: any;
 let collections: any = _collections;
-if (process.env.NODE_ENV === 'test') {
-  config = testConfig;
-} else {
-  config = _config;
-}
 
 const app = express();
 
@@ -32,7 +25,7 @@ for (let i = 0; i < rootKeys.length; i += 1) {
 }
 
 // Verify certificate
-if (config.ssl) {
+if (config.ssl && process.env.NODE_ENV !== 'test') {
   app.use((req: express.Request | any, res: express.Response, next: express.NextFunction) => {
     // Cert is not present
     if (!req.client.authorized) {
@@ -82,9 +75,9 @@ async function startServer() {
         throw error;
       }
 
-      const bind = typeof config.port === 'string'
-        ? 'Pipe ' + config.port
-        : 'Port ' + config.port;
+      const bind = typeof config.express_port === 'string'
+        ? 'Pipe ' + config.express_port
+        : 'Port ' + config.express_port;
 
       // handle specific listen errors with friendly messages
       switch (errorObj.code) {
@@ -103,7 +96,7 @@ async function startServer() {
 
     global.server.on('listening', () => console.log(`TAXII 2.0 server listening on port ${global.server.address().port}`));
 
-    global.server.listen(config.port);
+    global.server.listen(config.express_port);
   } catch (error) {
     console.log('Error: ', error);
   }

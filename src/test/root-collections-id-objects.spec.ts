@@ -7,13 +7,12 @@ const chaiHttp = require('chai-http');
 
 import * as chai from 'chai';
 
-import * as _config from './config.json';
+import config from '../services/config.service';
 import * as server from '../server/server';
 import { validateFirstVersionFilter, validateLastVersionFilter } from './test-helpers';
 
 const should = chai.should();
 const expect = chai.expect;
-const config: any = _config;
 
 chai.use(chaiHttp);
 

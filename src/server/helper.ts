@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-import * as config from '../assets/config.json';
+import config from '../services/config.service';
 
 export default class Helper {
 
