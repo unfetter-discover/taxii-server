@@ -8,6 +8,7 @@
     "clean": "rimraf dist/ tsdocs/ coverage/ .nyc_output/",
     "coverage": "nyc --extension .ts --reporter=lcov --reporter=text-lcov npm test && nyc report",
     "docs": "typedoc --out tsdocs --ignoreCompilerErrors --exclude '**/*.spec.ts' src/",
+    "help": "ts-node src/services/cli.service.ts --help",
     "lint": "tslint src/**/*.ts",
     "start": "ts-node src/server/server.ts",
     "start:dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server/server.ts",
