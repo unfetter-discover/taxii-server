@@ -54,6 +54,7 @@ async function startServer() {
     let serverOptions: object;
 
     if (config.ssl) {
+      console.log('Starting server *with* mutual TLS enabled');
       serverOptions = {
         key: fs.readFileSync(config.ssl.keyPath),
         cert: fs.readFileSync(config.ssl.certPath),
@@ -62,6 +63,7 @@ async function startServer() {
         rejectUnauthorized: false
       };
     } else {
+      console.log('Starting server *without* mutual TLS enabled');
       serverOptions = {
         key: fs.readFileSync('/etc/pki/tls/certs/server.key'),
         cert: fs.readFileSync('/etc/pki/tls/certs/server.crt')
