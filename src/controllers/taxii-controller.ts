@@ -14,7 +14,6 @@ import { IStix, IUFStix } from '../models/interfaces';
 import { Model } from 'mongoose';
 import MongooseModels from '../models/mongoose-models';
 
-
 let collections: any = _collections;
 
 const validRoots: any[] = [];
