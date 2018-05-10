@@ -53,6 +53,7 @@ export function generateConfiguration(cliArgs: Arguments): Config {
         if (retVal.ssl) {
             delete retVal.ssl;
         }
+        retVal.express_port = 4567;
     }
 
     return retVal;
