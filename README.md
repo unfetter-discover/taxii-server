@@ -12,10 +12,47 @@ Clone the repository to your directory of choice, install dependencies using ``n
 
 ## Usage
 
-`node server.js`
+`npm start`
 
 ## Testing
 
-Testing requires the `mocha`, `chai` and `chai-http` npm packages and
-`test/stix.json` to be loaded into a MongoDB instance. The connection string
-to this instance can be entered on line 5 of `test/config.json`.
+Testing requires the `mocha`, `chai` and `chai-http` npm packages.
+
+- `npm test` - Runs tests inside of docker environment
+- `npm test:local` - Runs tests on local host, assuming MongoDB is accessible
+
+
+# Configuration
+
+Configuration is done through a combination of the default configuration file, environmental variables, and command line arguments.
+
+The configuration file should be the *last* place to change a configuration.  Command line arguments take precendence over environmental variables, which take precendence over the configuration file.
+
+## Command Line Arguments
+
+Warning: The following list may be out of date.  To see current command line arguments, run `npm run help`.
+
+```
+Options:
+  --version                    Show version number                     [boolean]
+  -h, --host                   Host name and/or IP address for MongoDB
+  -p, --port                   Port for MongoDB
+  -c, --certificate            Absolute path to certificate file for Mutual TLS
+                               authentication (cert, key, and ca required for
+                               mutual TLS)
+  -k, --key                    Absolute path to key file for Mutual TLS
+                               authentication (cert, key, and ca required for
+                               mutual TLS)
+  -a, --certificate-authority  Absolute path to certificate authority file for
+                               Mutual TLS authentication (cert, key, and ca
+                               required for mutual TLS)
+  --help                       Show help                               [boolean]
+  ```
+
+## Environmental Variables
+
+- `SERVER_CERTIFICATE` - Path to certificate file for mutual SSL authentication (key, cert, and ca is required for mutual SSL authentication)
+- `SERVER_KEY` - Path to key file for mutual SSL authentication (key, cert, and ca is required for mutual SSL authentication)
+- `SERVER_CA` - Path to ca file for mutual SSL authentication (key, cert, and ca is required for mutual SSL authentication)
+- `MONGO_REPOSITORY` - Domain/IP for MongoDB
+- `MONGO_PORT` - Port for MongoDB

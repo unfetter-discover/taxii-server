@@ -17,7 +17,7 @@ before_script:
   
 
 script:
-  - docker run -it unfetter-taxii-server npm run checkup
+  - docker exec -it unfetter-taxii-server npm run checkup
 
 after_script:
   - docker-compose -f docker-compose.test.yml down

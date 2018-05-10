@@ -1,3 +1,9 @@
+const ERROR_401 = {
+  title: '401 Unauthorized',
+  description: 'The request requires authentication. ',
+  http_status: '401',
+};
+
 const ERROR_404 = {
   title: '404 Not Found',
   description: 'The requested resource was not found on the server',

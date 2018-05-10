@@ -29,5 +29,3 @@ RUN npm --loglevel error install && \
     rm -rf /usr/lib/node_modules/npm/html
 
 COPY . $WORKING_DIRECTORY
-
-EXPOSE 3002

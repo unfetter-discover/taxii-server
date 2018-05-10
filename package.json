@@ -8,10 +8,13 @@
     "clean": "rimraf dist/ tsdocs/ coverage/ .nyc_output/",
     "coverage": "nyc --extension .ts --reporter=lcov --reporter=text-lcov npm test && nyc report",
     "docs": "typedoc --out tsdocs --ignoreCompilerErrors --exclude '**/*.spec.ts' src/",
+    "help": "ts-node src/services/cli.service.ts --help",
     "lint": "tslint src/**/*.ts",
     "start": "ts-node src/server/server.ts",
     "start:dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server/server.ts",
-    "test": "mocha -r ts-node/register src/test/*.spec.ts"
+    "start:local:dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server/server.ts --host localhost --port 27018",
+    "test": "env NODE_ENV=test mocha -r ts-node/register src/test/*.spec.ts",
+    "test:local": "env NODE_ENV=test MONGO_PORT=27018 MONGO_REPOSITORY=localhost npm test"
   },
   "nyc": {
     "exclude": [
@@ -26,13 +29,15 @@
   "author": "amasi@mitre.org",
   "license": "ISC",
   "dependencies": {
+    "@types/yargs": "^11.0.0",
     "bluebird": "^3.5.1",
     "express": "^4.16.2",
     "express-paginate": "^0.3.0",
     "mongoose": "^4.12.5",
     "spdy": "^3.4.7",
     "uuid": "^3.2.1",
-    "uuid-validate": "0.0.2"
+    "uuid-validate": "0.0.2",
+    "yargs": "^11.0.0"
   },
   "devDependencies": {
     "@types/chai": "^4.1.3",

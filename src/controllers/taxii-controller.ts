@@ -7,21 +7,14 @@ import error from '../errors/http-error';
 import Helper from '../server/helper';
 import * as fs from 'fs';
 
-import * as _config from '../assets/config.json';
+import config from '../services/config.service';
 import * as _collections from '../assets/collections.json';
-import * as testConfig from '../test/config.json';
 import RequestAdatper from '../adapters/request-adapter';
 import { IStix, IUFStix } from '../models/interfaces';
 import { Model } from 'mongoose';
 import MongooseModels from '../models/mongoose-models';
 
-let config: any;
 let collections: any = _collections;
-if (process.env.NODE_ENV === 'test') {
-    config = testConfig;
-} else {
-    config = _config;
-}
 
 const validRoots: any[] = [];
 const rootKeys: any = Object.keys(config.discovery.api_roots);

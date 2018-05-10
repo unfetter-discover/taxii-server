@@ -2,22 +2,17 @@ import * as _mongoose from 'mongoose';
 import * as uuidValidate from 'uuid-validate';
 
 import * as invalidUUIDError from '../errors/invalid-uuid';
+import config from '../services/config.service';
 
-import * as _config from '../assets/config.json';
 import * as _collections from '../assets/collections.json';
-
-import * as testConfig from '../test/config.json';
 import * as testCollections from '../test/collections.json';
 
 const mongoose: any = _mongoose;
-let config: any;
 let collections: any;
 
 if (process.env.NODE_ENV === 'test') {
-  config = testConfig;
   collections = testCollections;
 } else {
-  config = _config;
   collections = _collections;
 }
 
