@@ -49,7 +49,8 @@ export function generateConfiguration(cliArgs: Arguments): Config {
     }
 
     // insert any config changes for testing here
-    if (process.env.NODE_ENV === 'test') {
+    if (process.env.NODE_ENV && process.env.NODE_ENV.toUpperCase() === 'TEST') {
+        console.log('Applying test configurations');
         if (retVal.ssl) {
             delete retVal.ssl;
         }

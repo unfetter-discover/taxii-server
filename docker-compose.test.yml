@@ -35,6 +35,7 @@ services:
     links:
      - cti-stix-store-repository:repository
     volumes:
+     - ./src:/usr/share/unfetter-taxii-server/src
      - ./certs/:/etc/pki/tls/certs
     entrypoint:
      - npm
