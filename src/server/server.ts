@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import TaxiiController from '../controllers/taxii-controller';
 import config from '../services/config.service';
 
-import * as _collections from '../assets/collections.json';
+import * as _collections from '../../assets/collections.json';
 import mongoInit from './mongoinit';
 
 let collections: any = _collections;
