@@ -1,6 +1,6 @@
 import { Arguments } from 'yargs';
 
-import * as _config from '../assets/config.json';
+import * as _config from '../../assets/config.json';
 import argv from './cli.service';
 import Config from '../models/config';
 

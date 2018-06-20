@@ -8,7 +8,7 @@ import Helper from '../server/helper';
 import * as fs from 'fs';
 
 import config from '../services/config.service';
-import * as _collections from '../assets/collections.json';
+import * as _collections from '../../assets/collections.json';
 import RequestAdatper from '../adapters/request-adapter';
 import { IStix, IUFStix } from '../models/interfaces';
 import { Model } from 'mongoose';

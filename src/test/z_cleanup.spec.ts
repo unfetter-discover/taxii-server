@@ -2,7 +2,6 @@ import * as chai from 'chai';
 
 import MongooseModels from '../models/mongoose-models';
 import mongoose from '../server/init';
-import * as stixArray from './stix_array.json';
 import config from '../services/config.service';
 
 describe('cleanup', () => {
