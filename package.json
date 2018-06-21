@@ -12,9 +12,10 @@
     "help": "ts-node src/services/cli.service.ts --help",
     "lint": "tslint src/**/*.ts",
     "start": "ts-node src/server/server.ts",
+    "start:local": "npm start -- -- --host localhost --port 27018",
     "start:deploy": "tsc && pm2-docker start dist/server/server.js -i max",
     "start:dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server/server.ts",
-    "start:local:dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server/server.ts --host localhost --port 27018",
+    "start:dev:local": "npm run start:dev -- --host localhost --port 27018",
     "test": "env NODE_ENV=test mocha -r ts-node/register src/test/*.spec.ts",
     "test:local": "env NODE_ENV=test MONGO_PORT=27018 MONGO_REPOSITORY=localhost npm test"
   },
