@@ -4,8 +4,8 @@ import * as uuidValidate from 'uuid-validate';
 import * as invalidUUIDError from '../errors/invalid-uuid';
 import config from '../services/config.service';
 
-import * as _collections from '../assets/collections.json';
-import * as testCollections from '../test/collections.json';
+import * as _collections from '../../assets/collections.json';
+import * as testCollections from '../../testassets/collections.json';
 
 const mongoose: any = _mongoose;
 let collections: any;

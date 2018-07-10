@@ -1,0 +1,18 @@
+config:
+  target: 'https://localhost'
+  defaults:
+    headers:
+      accept: "application/vnd.oasis.stix+json"
+      content-type: "application/vnd.oasis.taxii+json; charset=utf-8; version=2.0"
+  phases:
+    - duration: 60
+      arrivalCount: 180
+  variables:
+    collection:
+      - '95ecc380-afe9-11e4-9b6c-751b66dd541e'
+      - '062767bd-02d2-4b72-84ba-56caef0f8658'
+      - '2f669986-b40b-4423-b720-4396ca6a462b'
+scenarios:
+  - flow:
+    - get:
+        url: '/taxii-server/stix/collections/{{ collection }}/objects'

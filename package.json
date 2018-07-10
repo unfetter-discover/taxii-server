@@ -1,8 +1,9 @@
 {
   "name": "taxii-server",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "TAXII 2.0 server written for Node.js",
   "scripts": {
+    "benchmark": "artillery --version && artillery run artillery-config.yml -k",
     "build-ts": "tsc",
     "checkup": "npm run clean && npm run build-ts && npm run lint && npm run docs && npm run coverage",
     "clean": "rimraf dist/ tsdocs/ coverage/ .nyc_output/",
@@ -11,8 +12,10 @@
     "help": "ts-node src/services/cli.service.ts --help",
     "lint": "tslint src/**/*.ts",
     "start": "ts-node src/server/server.ts",
+    "start:local": "npm start -- -- --host localhost --port 27018",
+    "start:deploy": "tsc && pm2-docker start dist/server/server.js -i max",
     "start:dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server/server.ts",
-    "start:local:dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server/server.ts --host localhost --port 27018",
+    "start:dev:local": "npm run start:dev -- --host localhost --port 27018",
     "test": "env NODE_ENV=test mocha -r ts-node/register src/test/*.spec.ts",
     "test:local": "env NODE_ENV=test MONGO_PORT=27018 MONGO_REPOSITORY=localhost npm test"
   },
@@ -53,6 +56,7 @@
     "mocha": "^5.1.1",
     "nodemon": "^1.17.3",
     "nyc": "^11.7.1",
+    "pm2": "^2.10.4",
     "rimraf": "^2.6.2",
     "source-map-support": "^0.5.5",
     "ts-node": "^6.0.1",

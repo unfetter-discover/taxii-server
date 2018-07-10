@@ -341,5 +341,96 @@ describe('/GET :/root/collections/:id/objects', () => {
         res.should.have.status(404);
         done();
       })
-  })
-})
+  });
+
+  // ~~~ Post-June 2018 Unit Tests ~~~
+
+  it('it should GET objects from /stix/collections/95ecc380-afe9-11e4-9b6c-751b66dd541e/objects with X-TAXII-Date-Added-First', (done) => {
+    chai.request(server)
+      .get('/stix/collections/95ecc380-afe9-11e4-9b6c-751b66dd541e/objects')
+      .set('accept', 'application/vnd.oasis.stix+json; version=2.0')
+      .set('X-TAXII-Date-Added-First', '2017-06-01T00:00:00.000Z')
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.should.have.header('content-type', 'application/vnd.oasis.stix+json; charset=utf-8; version=2.0');
+        res.should.be.a('object');
+        res.body.should.have.property('type', 'bundle');
+        res.body.should.have.property('id');
+        res.body.should.have.property('spec_version', config.bundle_spec_version);
+        res.body.should.have.property('objects');
+        res.body.objects.should.have.length(32);
+        // tslint:disable-next-line:prefer-for-of
+        for (let i = 0; i < res.body.objects.length; i++) {
+          res.body.objects[i].should.have.property('type');
+          res.body.objects[i].should.have.property('id');
+          res.body.objects[i].should.have.property('created_by_ref');
+          res.body.objects[i].should.have.property('created');
+          res.body.objects[i].should.have.property('modified');
+          res.body.objects[i].should.have.property('name');
+          res.body.objects[i].should.have.property('description');
+          res.body.objects[i].should.have.property('external_references');
+        }
+        done();
+      })
+  });
+  
+  it('it should GET objects from /stix/collections/95ecc380-afe9-11e4-9b6c-751b66dd541e/objects with X-TAXII-Date-Added-Last', (done) => {
+    chai.request(server)
+      .get('/stix/collections/95ecc380-afe9-11e4-9b6c-751b66dd541e/objects')
+      .set('accept', 'application/vnd.oasis.stix+json; version=2.0')
+      .set('X-TAXII-Date-Added-Last', '2017-06-01T00:00:00.000Z')
+      .end((err, res) => {
+        res.should.have.status(200);
+        res.should.have.header('content-type', 'application/vnd.oasis.stix+json; charset=utf-8; version=2.0');
+        res.should.be.a('object');
+        res.body.should.have.property('type', 'bundle');
+        res.body.should.have.property('id');
+        res.body.should.have.property('spec_version', config.bundle_spec_version);
+        res.body.should.have.property('objects');
+        res.body.objects.should.have.length(20);
+        // tslint:disable-next-line:prefer-for-of
+        for (let i = 0; i < res.body.objects.length; i++) {
+          res.body.objects[i].should.have.property('type');
+          res.body.objects[i].should.have.property('id');
+          res.body.objects[i].should.have.property('created_by_ref');
+          res.body.objects[i].should.have.property('created');
+          res.body.objects[i].should.have.property('modified');
+          res.body.objects[i].should.have.property('name');
+          res.body.objects[i].should.have.property('description');
+          res.body.objects[i].should.have.property('external_references');
+        }
+        done();
+      })
+  });
+
+  it('it should GET objects from /stix/collections/95ecc380-afe9-11e4-9b6c-751b66dd541e/objects with date ranges', (done) => {
+    chai.request(server)
+      .get('/stix/collections/95ecc380-afe9-11e4-9b6c-751b66dd541e/objects')
+      .set('accept', 'application/vnd.oasis.stix+json; version=2.0')
+      .set('X-TAXII-Date-Added-First', '2017-05-31T21:31:27.985Z')
+      .set('X-TAXII-Date-Added-Last', '2017-12-14T16:46:06.044Z')
+      .end((err, res) => {
+        console.log(res.body.objects.length);
+        res.should.have.status(200);
+        res.should.have.header('content-type', 'application/vnd.oasis.stix+json; charset=utf-8; version=2.0');
+        res.should.be.a('object');
+        res.body.should.have.property('type', 'bundle');
+        res.body.should.have.property('id');
+        res.body.should.have.property('spec_version', config.bundle_spec_version);
+        res.body.should.have.property('objects');
+        res.body.objects.should.have.length(9);
+        // tslint:disable-next-line:prefer-for-of
+        for (let i = 0; i < res.body.objects.length; i++) {
+          res.body.objects[i].should.have.property('type');
+          res.body.objects[i].should.have.property('id');
+          res.body.objects[i].should.have.property('created_by_ref');
+          res.body.objects[i].should.have.property('created');
+          res.body.objects[i].should.have.property('modified');
+          res.body.objects[i].should.have.property('name');
+          res.body.objects[i].should.have.property('description');
+          res.body.objects[i].should.have.property('external_references');
+        }
+        done();
+      })
+  });
+});
