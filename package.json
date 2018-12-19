@@ -1,6 +1,6 @@
 {
   "name": "taxii-server",
-  "version": "0.3.11",
+  "version": "0.3.12",
   "description": "TAXII 2.0 server written for Node.js",
   "scripts": {
     "benchmark": "artillery --version && artillery run artillery-config.yml -k",
